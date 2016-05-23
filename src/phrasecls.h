@@ -21,11 +21,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PHRASECLS_H
 #define PHRASECLS_H
 
+namespace fpdt {
 
-class phraseCls
-{
-	public:
-		phraseCls();
-};
+	class phraseCls {
+		public:
+			phraseCls();
+	};
+
+}
 
 #endif // PHRASECLS_H

@@ -20,7 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "phrasecls.h"
 
-phraseCls::phraseCls()
-{
+namespace fpdt {
+
+	phraseCls::phraseCls() {
+
+	}
 
 }
