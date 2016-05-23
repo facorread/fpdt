@@ -67,10 +67,11 @@ namespace fpdt {
 		return std::isalnum(inputChar, loc) || std::ispunct(inputChar, loc);
 	}
 
-	fileCls::fileCls(const std::string& filename) {
+	fileCls::fileCls(const std::string& filename) :
+	mFileName{filename}
+	{
 		const listOfDocumentsCls listOfExtractedFilenames(extractXML(filename));
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
-			std::cerr << extractedFilename << '\n';
 			std::ifstream file(extractedFilename);
 			if(!file) {
 				errorMsg << "Error opening file " << extractedFilename.c_str() << ". Please debug.\n";

@@ -39,9 +39,13 @@ class fileCls {
 		char nextChar() _wur_;
 		/// Removes the portion of text in [mComparisonStart, mContents - 1). Used te remove the text of a question.
 		void removeQuestion();
+		/// Returns the name of the file.
+		const std::string& fileName() const _wur_ { return mFileName; }
 		/// Returns the full text that was extracted from the file.
 		const std::string& contents() const _wur_ { return mContents; }
 	private:
+		/// Contains the name of the file.
+		std::string mFileName;
 		/// Contains the full text that was extracted from the file.
 		std::string mContents{};
 		/// Contains the position of the start of a string comparison.
