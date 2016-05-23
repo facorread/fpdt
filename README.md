@@ -1,4 +1,4 @@
-fpdt: Fabio's plagiarism detection tool
+# fpdt: Fabio's plagiarism detection tool
 
 # Copyright and license
 
