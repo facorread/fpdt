@@ -21,11 +21,23 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef FILECLS_H
 #define FILECLS_H
 
+#include "diagnostics.h"
+#include <string>
 
-class fileCls
-{
+namespace fpdt {
+
+/// Abstraction of a student submission
+class fileCls {
 	public:
-		fileCls();
+		/// Opens the file and extracts the text into memory.
+		fileCls(const std::string& filename);
+		/// Returns the full text that was extracted from the file.
+		const std::string& contents() const _wur_ { return mContents; }
+	private:
+		/// Contains the full text that was extracted from the file.
+		std::string mContents{};
 };
+
+}
 
 #endif // FILECLS_H

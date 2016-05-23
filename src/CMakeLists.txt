@@ -18,11 +18,13 @@ project(fptd CXX)
 
 add_executable(
 fpdt
+diagnostics.cpp
 filecls.cpp
 main.cpp
 phrasecls.cpp
 )
 
+set(CMAKE_CXX_FLAGS "--pedantic-errors -Wall -Wextra -Werror -ftabstop=4 -march=native -pipe -std=gnu++14 -fabi-version=8 -Wfloat-equal")
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -ggdb3 -DDEBUG")

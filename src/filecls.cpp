@@ -18,9 +18,86 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <fstream>
 #include "filecls.h"
 
-fileCls::fileCls()
-{
+namespace fpdt {
+
+	static const std::string wordXMLfilename{"word/document.xml"};
+	static const std::string excelXMLfilename{"xl/workbook.xml"};
+
+	/// Extracts the Word document or Excel workbook XML from a docx/xlsx file.
+	const std::string& extractXML(const std::string& filename) {
+		std::system(std::string("rm -f " + wordXMLfilename + " " + excelXMLfilename).c_str());
+		// unzip returns 0 on successful extraction
+		if(std::system(std::string("{ unzip -l '" + filename + "' | grep -q " + wordXMLfilename + "; } && unzip -qq '" + filename + "' " + wordXMLfilename).c_str())) {
+			if(std::system(std::string("{ unzip -l '" + filename + "' | grep -q " + excelXMLfilename + "; } && unzip -qq '" + filename + "' " + excelXMLfilename).c_str())) {
+				errorMsg << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
+				std::abort();
+			}
+			return excelXMLfilename;
+		}
+		return wordXMLfilename;
+	}
+
+	/// Returns whether a character should be considered as valid content
+	bool isContent(const std::ifstream::char_type inputChar) {
+		static const std::locale loc;
+		return std::isalnum(inputChar, loc) || std::ispunct(inputChar, loc);
+	}
+
+	fileCls::fileCls(const std::string& filename) {
+		std::ifstream file(extractXML(filename));
+		// Used to transform all nonPrinting characters into only one whitespace
+		bool skippingWhitespace{false};
+		// Skipping an XML tag
+		bool skippingTag{false};
+		while(true) {
+			std::ifstream::char_type inputChar;
+			file.get(inputChar);
+			if(!file.good())
+				break;
+			if(skippingTag) {
+				if(inputChar == '>') {
+					skippingTag = false;
+					if(!skippingWhitespace) {
+						mContents += ' ';
+						skippingWhitespace = true;
+					}
+				}
+				continue;
+			}
+			if(inputChar == '<') {
+				skippingTag = true;
+				continue;
+			}
+			if(isContent(inputChar)) {
+				if(skippingWhitespace)
+					skippingWhitespace = false; // continue below;
+				mContents += inputChar;
+			} else if(!skippingWhitespace) {
+				mContents += ' ';
+				skippingWhitespace = true;
+			}
+		}
+	}
+
+#ifdef DEBUG
+	// Debug class
+	class debugCls {
+		public:
+			debugCls() {
+				const std::string testOutputFileName{"fileClsTestOutput.txt"};
+				std::ofstream testOutput(testOutputFileName);
+				testOutput << testFile0.contents() << '\n' << testFile1.contents();
+				errorMsg << "Please check the output of " << testOutputFileName.c_str() << ".\n";
+			}
+		private:
+			fileCls testFile0{"../test/Samplequestionsdocument.docx"};
+			fileCls testFile1{"../test/Sample questions spreadsheet.xlsx"};
+	};
+
+	debugCls debug;
+#endif // DEBUG
 
 }
