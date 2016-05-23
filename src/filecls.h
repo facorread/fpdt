@@ -31,11 +31,23 @@ class fileCls {
 	public:
 		/// Opens the file and extracts the text into memory.
 		fileCls(const std::string& filename);
+		/// Resets the file position pointers
+		void reset() { mComparisonStart = 0; mPosition = 0; }
+		/// Moves the pointers in order to start the next comparison.
+		void nextComparison() { if(mComparisonStart < mContents.length()) mPosition = ++mComparisonStart; }
+		/// Returns the char at the current position, then advances mPosition
+		char nextChar() _wur_;
+		/// Removes the portion of text in [mComparisonStart, mContents - 1). Used te remove the text of a question.
+		void removeQuestion();
 		/// Returns the full text that was extracted from the file.
 		const std::string& contents() const _wur_ { return mContents; }
 	private:
 		/// Contains the full text that was extracted from the file.
 		std::string mContents{};
+		/// Contains the position of the start of a string comparison.
+		std::string::size_type mComparisonStart{0};
+		/// Position within mContents
+		std::string::size_type mPosition{0};
 };
 
 }

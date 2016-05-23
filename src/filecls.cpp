@@ -41,7 +41,7 @@ namespace fpdt {
 	}
 
 	/// Returns whether a character should be considered as valid content
-	bool isContent(const std::ifstream::char_type inputChar) {
+	bool isContent(const char inputChar) {
 		static const std::locale loc;
 		return std::isalnum(inputChar, loc) || std::ispunct(inputChar, loc);
 	}
@@ -53,7 +53,7 @@ namespace fpdt {
 		// Skipping an XML tag
 		bool skippingTag{false};
 		while(true) {
-			std::ifstream::char_type inputChar;
+			char inputChar;
 			file.get(inputChar);
 			if(!file.good())
 				break;
@@ -82,6 +82,23 @@ namespace fpdt {
 		}
 	}
 
+	char fileCls::nextChar() {
+		// mContents.length() is optimized;
+		if(mPosition < mContents.length())
+			return mContents[mPosition++];
+		else
+			return 0;
+	}
+
+	void fileCls::removeQuestion() {
+		if(mPosition > mComparisonStart + 1)
+			mContents.erase(mComparisonStart, mPosition - 1 - mComparisonStart);
+		else {
+			errorMsg << "Attempt to erase an invalid portion of a string, at positions [" << mComparisonStart << ", " << mPosition - 1 << "). Please debug.\n";
+			std::abort();
+		}
+	}
+
 #ifdef DEBUG
 	// Debug class
 	class debugCls {
@@ -89,12 +106,12 @@ namespace fpdt {
 			debugCls() {
 				const std::string testOutputFileName{"fileClsTestOutput.txt"};
 				std::ofstream testOutput(testOutputFileName);
-				testOutput << testFile0.contents() << '\n' << testFile1.contents();
+				testOutput << questionsDocument.contents() << '\n' << questionsSpreadsheet.contents() << '\n';
 				errorMsg << "Please check the output of " << testOutputFileName.c_str() << ".\n";
 			}
 		private:
-			fileCls testFile0{"../test/Samplequestionsdocument.docx"};
-			fileCls testFile1{"../test/Sample questions spreadsheet.xlsx"};
+			fileCls questionsDocument{"../test/Samplequestionsdocument.docx"};
+			fileCls questionsSpreadsheet{"../test/Sample questions spreadsheet.xlsx"};
 	};
 
 	debugCls debug;
