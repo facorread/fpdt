@@ -19,17 +19,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Description
 
-This is a small C++ program designed to detect intra-corpal plagiarism; this is, students copying texts among themselves.
+This is a small `C++` program designed to detect intra-corpal plagiarism; this is, students copying texts among themselves.
 
 This program is not designed for general use. You are welcome to use it to develop your own derivative program for your own purposes. In my case, this program is designed to work with student assignment submissions downloaded from the University of Maryland's ELMS learning management system.
 
-In my class webpage the students download the assignment questions in the form of a docx document; they answer the questions directly there, and submit the completed document, possibly along with an xlsx file.
+In my class webpage the students download the assignment questions in the form of a `docx` and `xlsx` documents; they answer the questions directly there, and submit the completed documents via ELMS.
 
-This program takes as input the file `submissions.zip` downloaded from an ELMS assignment page. It will use the unzip program to extract the sumissions into a `fpdt` folder, then it will extract the text from all submissions into memory.
+This program takes as input the file `submissions.zip` downloaded from the ELMS assignment page. It will use the unzip program to extract the sumissions into a `fpdt` folder, then it will extract the text from all submissions into memory.
 
 This program optionally takes as input the original questions documents, which is highly recommended; otherwise the program will interpret the questions and guides as plagiarism as they will appear in every submission.
 
 # Workflow
+
+Please read carefully and understand all instructions in this section, as they will result in file deletion.
 
 The workflow of plagiarism detection starts with a text terminal located at the folder to which web downloads are saved (usually `~/Desktop` or `~/Downloads`).
 
@@ -43,7 +45,7 @@ This program will output a list in which each entry consists of: the text string
 
 # System requirements
 
-This program requires cmake, a recent C++14 compiler, and the unzip utility.
+This program requires `cmake`, a recent `C++14` compiler, and the `unzip` utility.
 
 # Source code
 
