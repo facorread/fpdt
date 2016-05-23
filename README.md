@@ -25,7 +25,7 @@ This program is not designed for general use. You are welcome to use it to devel
 
 In my class webpage the students download the assignment questions in the form of a `docx` and `xlsx` documents; they answer the questions directly there, and submit the completed documents via ELMS.
 
-This program takes as input the file `submissions.zip` downloaded from the ELMS assignment page. It will use the unzip program to extract the sumissions into a `fpdt` folder, then it will extract the text from all submissions into memory.
+This program takes as input the file `submissions.zip` downloaded from the ELMS assignment page. It will use the unzip program to extract the submissions into a `fpdt` folder, then it will extract the text from all submissions into memory.
 
 This program optionally takes as input the original questions documents, which is highly recommended; otherwise the program will interpret the questions and guides as plagiarism as they will appear in every submission.
 
