@@ -18,45 +18,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <vector>
 #include <fstream>
 #include "filecls.h"
+#include <iostream>
+#include "listoffiles.h"
+#include "main.h"
+#include "phrasecls.h"
 
 namespace fpdt {
-	typedef std::vector<std::string> listOfDocumentsCls;
-
 	void cleanExtractedFiles() {
 		std::system("rm -f word/document.xml xl/sharedStrings.xml xl/worksheets/sheet*.xml fpdtExtractedSpreadsheets.txt");
 	}
 
-	std::string getLine(std::ifstream& file) {
-		std::string result;
-		while(true) {
-			char c;
-			file.get(c);
-			if((c == '\n') || !file.good())
-				return result;
-			result.push_back(c);
-		}
-	}
-
 	/// Extracts the list of Word documents or Excel worksheets XML contained in a docx/xlsx file.
-	const listOfDocumentsCls extractXML(const std::string& filename) {
+	const listOfFilesCls extractXML(const std::string& filename) {
 		cleanExtractedFiles();
 		// unzip returns 0 on successful extraction
 		if(!std::system(std::string("unzip -qq '" + filename + "' word/document.xml 2> /dev/null").c_str()))
-			return listOfDocumentsCls{{"word/document.xml"}};
-		if(!std::system(std::string("unzip -qq '" + filename + "' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' 2> /dev/null && ls -1 xl/sharedStrings.xml xl/worksheets/sheet*.xml > fpdtExtractedSpreadsheets.txt").c_str())) {
-			listOfDocumentsCls listOfDocuments;
-			listOfDocuments.reserve(10);
-			std::ifstream listOfSheets("fpdtExtractedSpreadsheets.txt");
-			while(true) {
-				std::string sheetFileName(getLine(listOfSheets));
-				if(!listOfSheets.good())
-					return listOfDocuments;
-				listOfDocuments.emplace_back(sheetFileName); // The orders are attached in reverse order which does not matter;
-			}
-		}
+			return listOfFilesCls{{"word/document.xml"}};
+		if(!std::system(std::string("unzip -qq '" + filename + "' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' 2> /dev/null && ls -1  > fpdtExtractedSpreadsheets.txt").c_str()))
+			return listOfFiles("xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 		errorMsg << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
 		std::abort();
 	}
@@ -70,7 +51,7 @@ namespace fpdt {
 	fileCls::fileCls(const std::string& filename) :
 	mFileName{filename}
 	{
-		const listOfDocumentsCls listOfExtractedFilenames(extractXML(filename));
+		const listOfFilesCls listOfExtractedFilenames(extractXML(filename));
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
 			std::ifstream file(extractedFilename);
 			if(!file) {
@@ -113,39 +94,86 @@ namespace fpdt {
 		cleanExtractedFiles();
 	}
 
-	char fileCls::nextChar() {
+	bool fileCls::nextComparisonInviable() const {
+		if(mComparisonStart + 1 + minPhraseLength < mContents.length()) {
+			mPosition = ++mComparisonStart;
+			return false;
+		}
+		return true;
+	}
+
+	char fileCls::nextChar() const {
 		// mContents.length() is optimized;
 		if(mPosition < mContents.length())
 			return mContents[mPosition++];
 		else
 			return 0;
 	}
-
 	void fileCls::removeQuestion() {
-		if(mPosition > mComparisonStart + 1)
-			mContents.erase(mComparisonStart, mPosition - 1 - mComparisonStart);
-		else {
-			errorMsg << "Attempt to erase an invalid portion of a string, at positions [" << mComparisonStart << ", " << mPosition - 1 << "). Please debug.\n";
+#ifdef DEBUG
+		if((mPosition < mComparisonStart + minPhraseLength) || (mPosition >= mContents.length())) {
+			errorMsg << "Attempt to erase an invalid portion of a string with length " << mContents.length() << ", at positions [" << mComparisonStart << ", " << mPosition - 1 << "). Please debug.\n";
 			std::abort();
+		}
+#endif // DEBUG
+		mContents.erase(mComparisonStart, mPosition - 1 - mComparisonStart);
+		restartComparison();
+	}
+
+	void fileCls::removeQuestions(const fileCls& questionsDocument) {
+		reset();
+		questionsDocument.reset();
+		std::string candidatePhrase;
+		while(true) {
+			const char c1{nextChar()};
+			const char c2{questionsDocument.nextChar()};
+			if(c1 && c2 && (c1 == c2)) {
+				candidatePhrase.push_back(c1);
+				continue;
+			}
+			if(candidatePhrase.length() > minPhraseLength) {
+				removeQuestion();
+				if(mComparisonStart + minPhraseLength >= mContents.length())
+					return;
+				questionsDocument.reset(); // Required because there is an all new text in *this
+			} else {
+				restartComparison();
+				if(questionsDocument.nextComparisonInviable()) {
+					if(nextComparisonInviable())
+						return;
+					questionsDocument.reset();
+				}
+			}
+			candidatePhrase.clear();
 		}
 	}
 
-#ifdef DEBUG
-	// Debug class
-	class debugCls {
-		public:
-			debugCls() {
-				const std::string testOutputFileName{"fileClsTestOutput.txt"};
-				std::ofstream testOutput(testOutputFileName);
-				testOutput << questionsDocument.contents() << '\n' << questionsSpreadsheet.contents() << '\n';
-				errorMsg << "Please check the output of " << testOutputFileName.c_str() << ".\n";
+	void fileCls::searchPlagiarism(const fileCls& otherAssignment) {
+		reset();
+		otherAssignment.reset();
+		std::string candidatePhrase;
+		while(true) {
+			const char c1{nextChar()};
+			const char c2{otherAssignment.nextChar()};
+			if(c1 && c2 && (c1 == c2)) {
+				candidatePhrase.push_back(c1);
+				continue;
 			}
-		private:
-			fileCls questionsDocument{"../test/Samplequestionsdocument.docx"};
-			fileCls questionsSpreadsheet{"../test/Sample questions spreadsheet.xlsx"};
-	};
-
-	debugCls debug;
-#endif // DEBUG
-
+			if(candidatePhrase.length() > minPhraseLength) {
+				reportPlagiarism(phraseCls{candidatePhrase, *this, otherAssignment});
+				mComparisonStart = mPosition;
+				if(mComparisonStart + minPhraseLength >= mContents.length())
+					return;
+				otherAssignment.reset(); // Required because there is an all new text in *this
+			} else {
+				restartComparison();
+				if(otherAssignment.nextComparisonInviable()) {
+					if(nextComparisonInviable())
+						return;
+					otherAssignment.reset();
+				}
+			}
+			candidatePhrase.clear();
+		}
+	}
 }

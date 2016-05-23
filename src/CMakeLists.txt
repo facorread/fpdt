@@ -20,6 +20,7 @@ add_executable(
 fpdt
 diagnostics.cpp
 filecls.cpp
+listoffiles.cpp
 main.cpp
 phrasecls.cpp
 )

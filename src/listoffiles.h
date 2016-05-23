@@ -18,15 +18,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "filecls.h"
-#include <iostream>
-#include "phrasecls.h"
+#ifndef LISTOFFILES_H
+#define LISTOFFILES_H
+
+#include <list>
+#include <string>
 
 namespace fpdt {
+	typedef std::list<std::string> listOfFilesCls;
 
-	void fpdt::phraseCls::print() const {
-		std::cout << pFile1->fileName() << '\n' << pFile2->fileName() << '\n';
-		std::cout << mPhrase << "\n\n";
-	}
-
+	/// Returns the list of files given by the command ls. Example: listOfFiles("*.docx")
+	listOfFilesCls listOfFiles(const std::string filePattern);
 }
+
+#endif // LISTOFFILES_H

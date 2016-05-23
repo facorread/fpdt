@@ -21,11 +21,28 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PHRASECLS_H
 #define PHRASECLS_H
 
-namespace fpdt {
+#include "diagnostics.h"
+#include <string>
 
+namespace fpdt {
+	// Forward declaration.
+	class fileCls;
+	/// Represents a phrase that is being compared between two documents.
 	class phraseCls {
 		public:
-			phraseCls();
+			/// Constructor.
+			phraseCls(const std::string& phrase, const fileCls& file1, const fileCls& file2) : mPhrase{phrase}, pFile1{&file1}, pFile2{&file2} {}
+			/// Comparison operator
+			bool operator>(const phraseCls& rhs) const _wur_ { return mPhrase.length() > rhs.mPhrase.length(); }
+			/// Prints the plagiarized phrase.
+			void print() const;
+		private:
+			/// Phrase.
+			std::string mPhrase;
+			/// File containing the phrase.
+			const fileCls* pFile1;
+			/// File containing the phrase.
+			const fileCls* pFile2;
 	};
 
 }

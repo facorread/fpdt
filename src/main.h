@@ -21,6 +21,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MAIN_H
 #define MAIN_H
 
+namespace fpdt {
+	class phraseCls;
+	constexpr size_t minPhraseLength{60};
 
+	void reportPlagiarism(phraseCls&& phrase);
+}
 
 #endif // MAIN_H

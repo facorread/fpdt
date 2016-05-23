@@ -31,27 +31,33 @@ class fileCls {
 	public:
 		/// Opens the file and extracts the text into memory.
 		fileCls(const std::string& filename);
-		/// Resets the file position pointers
-		void reset() { mComparisonStart = 0; mPosition = 0; }
-		/// Moves the pointers in order to start the next comparison.
-		void nextComparison() { if(mComparisonStart < mContents.length()) mPosition = ++mComparisonStart; }
-		/// Returns the char at the current position, then advances mPosition
-		char nextChar() _wur_;
-		/// Removes the portion of text in [mComparisonStart, mContents - 1). Used te remove the text of a question.
-		void removeQuestion();
 		/// Returns the name of the file.
 		const std::string& fileName() const _wur_ { return mFileName; }
 		/// Returns the full text that was extracted from the file.
 		const std::string& contents() const _wur_ { return mContents; }
+		/// Removes text from questions and guides.
+		void removeQuestions(const fileCls& questionsDocument);
+		/// Searches for plagiarized phrases.
+		void searchPlagiarism(const fileCls& otherAssignment);
 	private:
 		/// Contains the name of the file.
 		std::string mFileName;
 		/// Contains the full text that was extracted from the file.
 		std::string mContents{};
 		/// Contains the position of the start of a string comparison.
-		std::string::size_type mComparisonStart{0};
+		mutable std::string::size_type mComparisonStart{0};
 		/// Position within mContents
-		std::string::size_type mPosition{0};
+		mutable std::string::size_type mPosition{0};
+		/// Resets the file position pointers
+		void reset() const { mComparisonStart = 0; mPosition = 0; }
+		/// Moves the pointers in order to start the next comparison.
+		bool nextComparisonInviable() const _wur_;
+		/// Restarts the current comparison.
+		void restartComparison() const { mPosition = mComparisonStart; }
+		/// Returns the char at the current position, then advances mPosition. Returns 0 if it at the end of the document.
+		char nextChar() const _wur_;
+		/// Removes the portion of text in [mComparisonStart, mContents - 1). Used te remove the text of a question.
+		void removeQuestion();
 };
 
 }

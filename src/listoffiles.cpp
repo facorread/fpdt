@@ -18,15 +18,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "filecls.h"
-#include <iostream>
-#include "phrasecls.h"
+#include <fstream>
+#include "listoffiles.h"
 
-namespace fpdt {
-
-	void fpdt::phraseCls::print() const {
-		std::cout << pFile1->fileName() << '\n' << pFile2->fileName() << '\n';
-		std::cout << mPhrase << "\n\n";
+std::string getLine(std::ifstream& file) {
+	std::string result;
+	while(true) {
+		char c;
+		file.get(c);
+		if((c == '\n') || !file.good())
+			return result;
+		result.push_back(c);
 	}
+}
 
+fpdt::listOfFilesCls fpdt::listOfFiles(const std::string filePattern) {
+	if(std::system(("ls -1 " + filePattern + " > fpdtListOfFiles.txt").c_str()))
+		return {};
+	listOfFilesCls listOfDocuments;
+	std::ifstream listOfSheets("fpdtListOfFiles.txt");
+	while(true) {
+		std::string sheetFileName(getLine(listOfSheets));
+		if(!listOfSheets.good())
+			return listOfDocuments;
+		listOfDocuments.emplace_back(sheetFileName); // The orders are attached in reverse order which does not matter;
+	}
+	return {}; // Innocuous
 }
