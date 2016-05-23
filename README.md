@@ -35,13 +35,13 @@ Please read carefully and understand all instructions in this section, as they w
 
 The workflow of plagiarism detection starts with a text terminal located at the folder to which web downloads are saved (usually `~/Desktop` or `~/Downloads`).
 
-`rm -rv submissions*.zip *.docx *.xlsx fpdt`
+`rm -rv submissions*.zip *.docx *.xlsx fpdt fpdt.txt`
 
 The ELMS assignment webpage is opened, the questions are downloaded, and then the `Download Submissions` link is clicked. Once the files are downloaded, the program is invoked at the terminal without changing the working directory. Every `docx` and `xlsx` file currently at the download directory (not subdirectories or zipfiles) is taken as questions input.
 
 # Output
 
-This program will output a list in which each entry consists of: the text strings that is repeated within or across documents, and the names of those documents in which the string appears. The list is ordered according to the string length, in decreasing order. The list is limited to strings of 60 characters or more.
+This program will produce `fpdt.txt` containing a list in which each entry consists of: the text string that is repeated within or across documents, and the names of those documents in which the string appears. The list is ordered according to the string length, in decreasing order. The list is limited to strings of 60 characters or more.
 
 # System requirements
 
