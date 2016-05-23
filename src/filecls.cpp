@@ -18,26 +18,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include <vector>
 #include <fstream>
 #include "filecls.h"
 
 namespace fpdt {
+	typedef std::vector<std::string> listOfDocumentsCls;
 
-	static const std::string wordXMLfilename{"word/document.xml"};
-	static const std::string excelXMLfilename{"xl/workbook.xml"};
+	void cleanExtractedFiles() {
+		std::system("rm -f word/document.xml xl/sharedStrings.xml xl/worksheets/sheet*.xml fpdtExtractedSpreadsheets.txt");
+	}
 
-	/// Extracts the Word document or Excel workbook XML from a docx/xlsx file.
-	const std::string& extractXML(const std::string& filename) {
-		std::system(std::string("rm -f " + wordXMLfilename + " " + excelXMLfilename).c_str());
-		// unzip returns 0 on successful extraction
-		if(std::system(std::string("{ unzip -l '" + filename + "' | grep -q " + wordXMLfilename + "; } && unzip -qq '" + filename + "' " + wordXMLfilename).c_str())) {
-			if(std::system(std::string("{ unzip -l '" + filename + "' | grep -q " + excelXMLfilename + "; } && unzip -qq '" + filename + "' " + excelXMLfilename).c_str())) {
-				errorMsg << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
-				std::abort();
-			}
-			return excelXMLfilename;
+	std::string getLine(std::ifstream& file) {
+		std::string result;
+		while(true) {
+			char c;
+			file.get(c);
+			if((c == '\n') || !file.good())
+				return result;
+			result.push_back(c);
 		}
-		return wordXMLfilename;
+	}
+
+	/// Extracts the list of Word documents or Excel worksheets XML contained in a docx/xlsx file.
+	const listOfDocumentsCls extractXML(const std::string& filename) {
+		cleanExtractedFiles();
+		// unzip returns 0 on successful extraction
+		if(!std::system(std::string("unzip -qq '" + filename + "' word/document.xml 2> /dev/null").c_str()))
+			return listOfDocumentsCls{{"word/document.xml"}};
+		if(!std::system(std::string("unzip -qq '" + filename + "' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' 2> /dev/null && ls -1 xl/sharedStrings.xml xl/worksheets/sheet*.xml > fpdtExtractedSpreadsheets.txt").c_str())) {
+			listOfDocumentsCls listOfDocuments;
+			listOfDocuments.reserve(10);
+			std::ifstream listOfSheets("fpdtExtractedSpreadsheets.txt");
+			while(true) {
+				std::string sheetFileName(getLine(listOfSheets));
+				if(!listOfSheets.good())
+					return listOfDocuments;
+				listOfDocuments.emplace_back(sheetFileName); // The orders are attached in reverse order which does not matter;
+			}
+		}
+		errorMsg << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
+		std::abort();
 	}
 
 	/// Returns whether a character should be considered as valid content
@@ -47,39 +68,48 @@ namespace fpdt {
 	}
 
 	fileCls::fileCls(const std::string& filename) {
-		std::ifstream file(extractXML(filename));
-		// Used to transform all nonPrinting characters into only one whitespace
-		bool skippingWhitespace{false};
-		// Skipping an XML tag
-		bool skippingTag{false};
-		while(true) {
-			char inputChar;
-			file.get(inputChar);
-			if(!file.good())
-				break;
-			if(skippingTag) {
-				if(inputChar == '>') {
-					skippingTag = false;
-					if(!skippingWhitespace) {
-						mContents += ' ';
-						skippingWhitespace = true;
+		const listOfDocumentsCls listOfExtractedFilenames(extractXML(filename));
+		for(const std::string& extractedFilename : listOfExtractedFilenames) {
+			std::cerr << extractedFilename << '\n';
+			std::ifstream file(extractedFilename);
+			if(!file) {
+				errorMsg << "Error opening file " << extractedFilename.c_str() << ". Please debug.\n";
+				std::abort();
+			}
+			// Used to transform all nonPrinting characters into only one whitespace
+			bool skippingWhitespace{false};
+			// Skipping an XML tag
+			bool skippingTag{false};
+			while(true) {
+				char inputChar;
+				file.get(inputChar);
+				if(!file.good())
+					break;
+				if(skippingTag) {
+					if(inputChar == '>') {
+						skippingTag = false;
+						if(!skippingWhitespace) {
+							mContents += ' ';
+							skippingWhitespace = true;
+						}
 					}
+					continue;
 				}
-				continue;
-			}
-			if(inputChar == '<') {
-				skippingTag = true;
-				continue;
-			}
-			if(isContent(inputChar)) {
-				if(skippingWhitespace)
-					skippingWhitespace = false; // continue below;
-				mContents += inputChar;
-			} else if(!skippingWhitespace) {
-				mContents += ' ';
-				skippingWhitespace = true;
+				if(inputChar == '<') {
+					skippingTag = true;
+					continue;
+				}
+				if(isContent(inputChar)) {
+					if(skippingWhitespace)
+						skippingWhitespace = false; // continue below;
+					mContents += inputChar;
+				} else if(!skippingWhitespace) {
+					mContents += ' ';
+					skippingWhitespace = true;
+				}
 			}
 		}
+		cleanExtractedFiles();
 	}
 
 	char fileCls::nextChar() {
