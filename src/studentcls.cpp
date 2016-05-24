@@ -85,8 +85,10 @@ namespace fpdt {
 					if(skippingWhitespace)
 						skippingWhitespace = false; // continue below;
 					phrase += inputChar;
-					if((((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) && (phrase.length() > 20)) {
-						mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
+					if(((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) {
+						std::cerr << '<' << phrase << ">\n";
+						if(phrase.size() > 10)
+							mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
 						phrase.clear();
 						startingPhrase = true;
 					} else if(startingPhrase)
