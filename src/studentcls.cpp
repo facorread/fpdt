@@ -58,7 +58,7 @@ namespace fpdt {
 				std::abort();
 			}
 			std::string phrase;
-			bool startingSentence{true};
+			bool startingPhrase{true};
 			// Used to transform all nonPrinting characters into only one whitespace
 			bool skippingWhitespace{false};
 			// Skipping an XML tag
@@ -67,8 +67,14 @@ namespace fpdt {
 			bool previousInputCharIsDigit{false};
 			while(file.get(inputChar)) {
 				if(skippingTag) {
-					if(inputChar == '>')
+					if(inputChar == '>') {
 						skippingTag = false;
+						if(!skippingWhitespace) {
+							if(!startingPhrase)
+								phrase += ' ';
+							skippingWhitespace = true;
+						}
+					}
 					continue;
 				}
 				if(inputChar == '<') {
@@ -82,13 +88,13 @@ namespace fpdt {
 					if((((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) && (phrase.length() > 20)) {
 						mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
 						phrase.clear();
-						startingSentence = true;
-					} else if(startingSentence)
-						startingSentence = false;
+						startingPhrase = true;
+					} else if(startingPhrase)
+						startingPhrase = false;
 					previousInputCharIsDigit = std::isdigit(inputChar, std::locale{});
 			} else {
 				if(!skippingWhitespace) {
-					if(!startingSentence)
+					if(!startingPhrase)
 						phrase += ' ';
 					skippingWhitespace = true;
 				}
