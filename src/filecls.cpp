@@ -51,6 +51,7 @@ namespace fpdt {
 	fileCls::fileCls(const std::string& filename) :
 	mFileName{filename}
 	{
+
 		const listOfFilesCls listOfExtractedFilenames(extractXML(filename));
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
 			std::ifstream file(extractedFilename);
@@ -92,6 +93,17 @@ namespace fpdt {
 			}
 		}
 		cleanExtractedFiles();
+	}
+
+	std::string fileCls::extractStudentName(const std::string& fileName) {
+		std::string result;
+		for(std::string::const_iterator it(fileName.begin()); it != fileName.end(); ++it) {
+			const char c(*it);
+			if(c == '_')
+				break;
+			result += c;
+		}
+		return result;
 	}
 
 	bool fileCls::nextComparisonInviable() const {
@@ -149,6 +161,8 @@ namespace fpdt {
 	}
 
 	void fileCls::searchPlagiarism(const fileCls& otherAssignment) {
+		if(mStudentName == otherAssignment.mStudentName)
+			return;
 		reset();
 		otherAssignment.reset();
 		std::string candidatePhrase, phraseCompilation;
@@ -178,4 +192,5 @@ namespace fpdt {
 			candidatePhrase.clear();
 		}
 	}
+
 }

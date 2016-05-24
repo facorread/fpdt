@@ -42,12 +42,16 @@ class fileCls {
 	private:
 		/// Contains the name of the file.
 		std::string mFileName;
+		/// Contains the name of the student, extracted from mFileName.
+		std::string mStudentName{extractStudentName(mFileName)};
 		/// Contains the full text that was extracted from the file.
-		std::string mContents{};
+		std::string mContents;
 		/// Contains the position of the start of a string comparison.
 		mutable std::string::size_type mComparisonStart{0};
 		/// Position within mContents
 		mutable std::string::size_type mPosition{0};
+		/// Returns the student name extracted from mFileName.
+		static std::string extractStudentName(const std::string& fileName);
 		/// Resets the file position pointers
 		void reset() const { mComparisonStart = 0; mPosition = 0; }
 		/// Moves the pointers in order to start the next comparison.
