@@ -63,7 +63,7 @@ class studentSubmissionsCls {
 		/// Returns the char at the current position, then advances mPosition. Returns 0 if it at the end of the document.
 		char nextChar() const _wur_;
 		/// Removes the portion of text in [mComparisonStart, mContents - 1). Used te remove the text of a question.
-		void removeQuestion();
+		void removeMatchedPortion() const;
 };
 
 }

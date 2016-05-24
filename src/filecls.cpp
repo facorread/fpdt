@@ -109,7 +109,7 @@ namespace fpdt {
 		else
 			return 0;
 	}
-	void studentSubmissionsCls::removeQuestion() {
+	void studentSubmissionsCls::removeMatchedPortion() const {
 #ifdef DEBUG
 		if((mPosition < mComparisonStart + minPhraseLength) || (mPosition >= mContents.length())) {
 			errorMsg << "Attempt to erase an invalid portion of a string with length " << mContents.length() << ", at positions [" << mComparisonStart << ", " << mPosition - 1 << "). Please debug.\n";
@@ -134,7 +134,7 @@ namespace fpdt {
 				continue;
 			}
 			if(candidatePhrase.length() > minPhraseLength) {
-				removeQuestion();
+				removeMatchedPortion();
 				if(mComparisonStart + minPhraseLength >= mContentsCopy.length()) {
 					mContents = mContentsCopy;
 					return;
@@ -169,9 +169,10 @@ namespace fpdt {
 			}
 			if(candidatePhrase.length() > minPhraseLength) {
 				phraseCompilation += candidatePhrase + "\n\n";
-				mComparisonStart = mPosition;
+				removeMatchedPortion();
 				if(mComparisonStart + minPhraseLength >= mContentsCopy.length())
 					return;
+				otherAssignment.removeMatchedPortion();
 				otherAssignment.reset(); // Required because there is an all new text in *this
 			} else {
 				restartComparison();
