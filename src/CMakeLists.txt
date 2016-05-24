@@ -21,7 +21,7 @@ fpdt
 chrono.cpp
 diagnostics.cpp
 eta.cpp
-filecls.cpp
+studentcls.cpp
 listoffiles.cpp
 main.cpp
 phrasecls.cpp
