@@ -43,6 +43,10 @@ The ELMS assignment webpage is opened, the questions are downloaded, and then th
 
 This program produces a file `fpdt.txt` containing a list in which each entry consists of the names of the students and the phrases that match between them, in decreasing length order. Each item serves as a red flag for your own inspection of their assignments.
 
+# Known issues
+
+This program will certainly output some questions as false positives. This is because hashes are calculated per sentence, but sentences are identified by the program using a primitive algorithm. This is why your own inspection of the assignments is required after looking at the output. There are no plans to address this issue.
+
 # System requirements
 
 This program requires `cmake`, a recent `C++14` compiler, and the `unzip` utility.
