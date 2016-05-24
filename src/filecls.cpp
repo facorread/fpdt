@@ -151,7 +151,7 @@ namespace fpdt {
 	void fileCls::searchPlagiarism(const fileCls& otherAssignment) {
 		reset();
 		otherAssignment.reset();
-		std::string candidatePhrase;
+		std::string candidatePhrase, phraseCompilation;
 		while(true) {
 			const char c1{nextChar()};
 			const char c2{otherAssignment.nextChar()};
@@ -160,7 +160,7 @@ namespace fpdt {
 				continue;
 			}
 			if(candidatePhrase.length() > minPhraseLength) {
-				reportPlagiarism(phraseCls{candidatePhrase, *this, otherAssignment});
+				phraseCompilation += candidatePhrase + "\n\n";
 				mComparisonStart = mPosition;
 				if(mComparisonStart + minPhraseLength >= mContents.length())
 					return;
@@ -168,8 +168,10 @@ namespace fpdt {
 			} else {
 				restartComparison();
 				if(otherAssignment.nextComparisonInviable()) {
-					if(nextComparisonInviable())
+					if(nextComparisonInviable()) {
+						reportPlagiarism(phraseCls{phraseCompilation, *this, otherAssignment});
 						return;
+					}
 					otherAssignment.reset();
 				}
 			}

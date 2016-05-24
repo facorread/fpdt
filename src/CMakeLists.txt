@@ -18,7 +18,9 @@ project(fptd CXX)
 
 add_executable(
 fpdt
+chrono.cpp
 diagnostics.cpp
+eta.cpp
 filecls.cpp
 listoffiles.cpp
 main.cpp

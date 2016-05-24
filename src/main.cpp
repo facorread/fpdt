@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
+#include "eta.h"
 #include "filecls.h"
 #include "listoffiles.h"
 #include <iostream>
@@ -30,6 +31,10 @@ namespace fpdt {
 
 	void reportPlagiarism(phraseCls&& phrase) {
 		plagiarizedPhrases.emplace(std::move(phrase));
+	}
+
+	size_t nPlagiarismReports() {
+		return plagiarizedPhrases.size();
 	}
 
 }
@@ -59,16 +64,23 @@ int main() {
 		std::cerr << "No assignments in accepted formats.\n";
 		std::exit(1);
 	}
+	etaCls eta;
+	eta.start(submissionsFileNames.size() * (submissionsFileNames.size() - 1) / 2);
 	for(const std::string& submissionFileName : submissionsFileNames) {
 		fileListCls::iterator subIt{submissionFiles.emplace(submissionFiles.end(), submissionFileName)};
-		for(const fileCls& questionsFile : questionsFiles) {
+		for(const fileCls& questionsFile : questionsFiles)
 			subIt->removeQuestions(questionsFile);
-		}
 		if(submissionFiles.size() > 1) {
-			for(fileListCls::iterator comparedIt(submissionFiles.begin()); comparedIt != subIt; ++comparedIt)
+			for(fileListCls::iterator comparedIt(submissionFiles.begin()); comparedIt != subIt; ++comparedIt) {
+				eta.step();
+				if(!(eta.scenario() % 10))
+					eta.info();
 				subIt->searchPlagiarism(*comparedIt);
+			}
 		}
 	}
+	std::cerr << "              \r                                                                             \r";
+	eta.printDescription();
 
 	///3. Print plagiarism report.
 	for(const phraseCls& phrase : plagiarizedPhrases)
