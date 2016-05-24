@@ -79,7 +79,7 @@ namespace fpdt {
 					if(skippingWhitespace)
 						skippingWhitespace = false; // continue below;
 					phrase += inputChar;
-					if((((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':')) && (phrase.length() > 20)) {
+					if((((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) && (phrase.length() > 20)) {
 						mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
 						phrase.clear();
 						startingSentence = true;

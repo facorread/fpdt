@@ -41,7 +41,7 @@ The ELMS assignment webpage is opened, the questions are downloaded, and then th
 
 # Output
 
-This program will produce `fpdt.txt` containing a list in which each entry consists of: the text string that is repeated within or across documents, and the names of those documents in which the string appears. The list is ordered according to the string length, in decreasing order. The list is limited to strings of 60 characters or more.
+This program produces a file `fpdt.txt` containing a list in which each entry consists of the names of the students and the phrases that match between them, in decreasing length order. Each item serves as a red flag for your own inspection of their assignments.
 
 # System requirements
 
