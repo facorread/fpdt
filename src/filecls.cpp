@@ -56,6 +56,7 @@ namespace fpdt {
 				errorMsg << "Error opening file " << extractedFilename.c_str() << ". Please debug.\n";
 				std::abort();
 			}
+			mContents.reserve(mContents.size() + 10000);
 			// Used to transform all nonPrinting characters into only one whitespace
 			bool skippingWhitespace{false};
 			// Skipping an XML tag
