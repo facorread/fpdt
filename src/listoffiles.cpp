@@ -33,15 +33,14 @@ std::string getLine(std::ifstream& file) {
 }
 
 fpdt::listOfFilesCls fpdt::listOfFiles(const std::string filePattern) {
-	if(std::system(("ls -1 " + filePattern + " > fpdtListOfFiles.txt").c_str()))
-		return {};
-	listOfFilesCls listOfDocuments;
-	std::ifstream listOfSheets("fpdtListOfFiles.txt");
+	std::system(("ls -1 " + filePattern + " > fpdtListOfFiles.txt 2>/dev/null").c_str()); // Ignore the exit code.
+	listOfFilesCls result;
+	std::ifstream lsResult("fpdtListOfFiles.txt");
 	while(true) {
-		std::string sheetFileName(getLine(listOfSheets));
-		if(!listOfSheets.good())
-			return listOfDocuments;
-		listOfDocuments.emplace_back(sheetFileName); // The orders are attached in reverse order which does not matter;
+		std::string documentName(getLine(lsResult));
+		if(!lsResult.good())
+			return result;
+		result.emplace_back(documentName); // The orders are attached in reverse order which does not matter;
 	}
 	return {}; // Innocuous
 }
