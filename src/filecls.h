@@ -26,32 +26,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace fpdt {
 
-/// Abstraction of a student submission
-class fileCls {
+/// Abstraction of a student's submissions
+class studentSubmissionsCls {
 	public:
+		/// Sets the student name.
+		void setStudentName(const std::string& studentname) { mStudentName = studentname; }
 		/// Opens the file and extracts the text into memory.
-		fileCls(const std::string& filename);
+		void add(const std::string& filename);
 		/// Returns the name of the file.
-		const std::string& fileName() const _wur_ { return mFileName; }
+		const std::string& studentName() const _wur_ { return mStudentName; }
 		/// Returns the full text that was extracted from the file.
 		const std::string& contents() const _wur_ { return mContents; }
 		/// Removes text from questions and guides.
-		void removeQuestions(const fileCls& questionsDocument);
+		void removeQuestions(const studentSubmissionsCls& questionsDocument);
 		/// Searches for plagiarized phrases.
-		void searchPlagiarism(const fileCls& otherAssignment);
+		void searchPlagiarism(const studentSubmissionsCls& otherAssignment) const;
 	private:
 		/// Contains the name of the file.
-		std::string mFileName;
-		/// Contains the name of the student, extracted from mFileName.
-		std::string mStudentName{extractStudentName(mFileName)};
+		std::string mStudentName;
 		/// Contains the full text that was extracted from the file.
 		std::string mContents;
 		/// Contains the position of the start of a string comparison.
 		mutable std::string::size_type mComparisonStart{0};
 		/// Position within mContents
 		mutable std::string::size_type mPosition{0};
-		/// Returns the student name extracted from mFileName.
-		static std::string extractStudentName(const std::string& fileName);
 		/// Resets the file position pointers
 		void reset() const { mComparisonStart = 0; mPosition = 0; }
 		/// Moves the pointers in order to start the next comparison.

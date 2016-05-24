@@ -19,14 +19,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "filecls.h"
+#include <fstream>
 #include <iostream>
 #include "phrasecls.h"
 
-namespace fpdt {
+namespace fpdt {	
+	std::ofstream outFile("fpdt.txt");
 
 	void fpdt::phraseCls::print() const {
-		std::cout << pFile1->fileName() << '\n' << pFile2->fileName() << '\n';
-		std::cout << mPhrase << "\n\n";
+		outFile << mStudent1 << '\t' << mStudent2 << '\n';
+		outFile << mPhrase << "\n\n";
 	}
 
 }

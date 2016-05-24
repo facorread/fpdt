@@ -48,10 +48,7 @@ namespace fpdt {
 		return std::isalnum(inputChar, loc) || std::ispunct(inputChar, loc);
 	}
 
-	fileCls::fileCls(const std::string& filename) :
-	mFileName{filename}
-	{
-
+	void studentSubmissionsCls::add(const std::string& filename) {
 		const listOfFilesCls listOfExtractedFilenames(extractXML(filename));
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
 			std::ifstream file(extractedFilename);
@@ -93,20 +90,10 @@ namespace fpdt {
 			}
 		}
 		cleanExtractedFiles();
+		mContents += "\n\n";
 	}
 
-	std::string fileCls::extractStudentName(const std::string& fileName) {
-		std::string result;
-		for(std::string::const_iterator it(fileName.begin()); it != fileName.end(); ++it) {
-			const char c(*it);
-			if(c == '_')
-				break;
-			result += c;
-		}
-		return result;
-	}
-
-	bool fileCls::nextComparisonInviable() const {
+	bool studentSubmissionsCls::nextComparisonInviable() const {
 		if(mComparisonStart + 1 + minPhraseLength < mContents.length()) {
 			mPosition = ++mComparisonStart;
 			return false;
@@ -114,14 +101,14 @@ namespace fpdt {
 		return true;
 	}
 
-	char fileCls::nextChar() const {
+	char studentSubmissionsCls::nextChar() const {
 		// mContents.length() is optimized;
 		if(mPosition < mContents.length())
 			return mContents[mPosition++];
 		else
 			return 0;
 	}
-	void fileCls::removeQuestion() {
+	void studentSubmissionsCls::removeQuestion() {
 #ifdef DEBUG
 		if((mPosition < mComparisonStart + minPhraseLength) || (mPosition >= mContents.length())) {
 			errorMsg << "Attempt to erase an invalid portion of a string with length " << mContents.length() << ", at positions [" << mComparisonStart << ", " << mPosition - 1 << "). Please debug.\n";
@@ -132,7 +119,7 @@ namespace fpdt {
 		restartComparison();
 	}
 
-	void fileCls::removeQuestions(const fileCls& questionsDocument) {
+	void studentSubmissionsCls::removeQuestions(const studentSubmissionsCls& questionsDocument) {
 		reset();
 		questionsDocument.reset();
 		std::string candidatePhrase;
@@ -160,9 +147,7 @@ namespace fpdt {
 		}
 	}
 
-	void fileCls::searchPlagiarism(const fileCls& otherAssignment) {
-		if(mStudentName == otherAssignment.mStudentName)
-			return;
+	void studentSubmissionsCls::searchPlagiarism(const studentSubmissionsCls& otherAssignment) const {
 		reset();
 		otherAssignment.reset();
 		std::string candidatePhrase, phraseCompilation;

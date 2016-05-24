@@ -26,12 +26,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace fpdt {
 	// Forward declaration.
-	class fileCls;
+	class studentSubmissionsCls;
 	/// Represents a phrase that is being compared between two documents.
 	class phraseCls {
 		public:
 			/// Constructor.
-			phraseCls(const std::string& phrase, const fileCls& file1, const fileCls& file2) : mPhrase{phrase}, pFile1{&file1}, pFile2{&file2} {}
+			phraseCls(const std::string& phrase, const studentSubmissionsCls& file1, const studentSubmissionsCls& file2) : mPhrase{phrase}, mStudent1{file1.studentName()}, mStudent2{file2.studentName()} {}
 			/// Comparison operator
 			bool operator>(const phraseCls& rhs) const _wur_ { return mPhrase.length() > rhs.mPhrase.length(); }
 			/// Prints the plagiarized phrase.
@@ -39,10 +39,10 @@ namespace fpdt {
 		private:
 			/// Phrase.
 			std::string mPhrase;
-			/// File containing the phrase.
-			const fileCls* pFile1;
-			/// File containing the phrase.
-			const fileCls* pFile2;
+			/// Student that wrote the phrase.
+			std::string mStudent1;
+			/// Student that wrote the phrase.
+			std::string mStudent2;
 	};
 
 }

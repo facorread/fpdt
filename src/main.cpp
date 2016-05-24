@@ -22,7 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "filecls.h"
 #include "listoffiles.h"
 #include <iostream>
-#include <list>
+#include <map>
 #include "phrasecls.h"
 #include <set>
 
@@ -37,24 +37,40 @@ namespace fpdt {
 		return plagiarizedPhrases.size();
 	}
 
+	std::string extractStudentName(const std::string& fileName) {
+		for(std::string::const_iterator it(fileName.begin()); it != fileName.end(); ++it) {
+			const char c(*it);
+			if(c == '/')
+				break;
+		}
+		std::string result;
+		for(std::string::const_iterator it(fileName.begin()); it != fileName.end(); ++it) {
+			const char c(*it);
+			if(c == '_')
+				break;
+			result += c;
+		}
+		return result;
+	}
 }
 
 int main() {
 	using namespace fpdt;
-	typedef std::list<fileCls> fileListCls;
 	///1. Questions files are opened.
-	fileListCls questionsFiles;
+	studentSubmissionsCls questionsFiles;
 	const listOfFilesCls questionsFileNames{listOfFiles("*.docx *.xlsx")};
 	if(questionsFileNames.empty()) {
 		std::cerr << "Assignment question files are required to prevent false positives.\n";
 		std::exit(1);
 	}
 	for(const std::string& questionsFileName : questionsFileNames) {
-		questionsFiles.emplace_back(questionsFileName);
+		questionsFiles.add(questionsFileName);
 	}
 
 	///2. Assignment submissions are opened.
-	fileListCls submissionFiles;
+	// Map of student names to student submissions.
+	typedef std::map<std::string, studentSubmissionsCls> studentsListCls;
+	studentsListCls studentSubmissions;
 	if(std::system(std::string("unzip -qqn submissions.zip '*.docx' '*.xlsx' -d fpdtSubmissions >& fpdtUnzipOutput.txt").c_str())) {
 		std::cerr << "Error opening the submissions zipfile. Please review.\n";
 		std::exit(1);
@@ -64,24 +80,35 @@ int main() {
 		std::cerr << "No assignments in accepted formats.\n";
 		std::exit(1);
 	}
-	etaCls eta;
-	eta.start(submissionsFileNames.size() * (submissionsFileNames.size() - 1) / 2);
 	for(const std::string& submissionFileName : submissionsFileNames) {
-		fileListCls::iterator subIt{submissionFiles.emplace(submissionFiles.end(), submissionFileName)};
-		for(const fileCls& questionsFile : questionsFiles)
-			subIt->removeQuestions(questionsFile);
-		if(submissionFiles.size() > 1) {
-			for(fileListCls::iterator comparedIt(submissionFiles.begin()); comparedIt != subIt; ++comparedIt) {
+		const std::string& studentName{extractStudentName(submissionFileName)};
+		studentSubmissions[studentName].add(submissionFileName);
+	}
+	if(studentSubmissions.empty()) {
+		errorMsg << "No student submissions. Please debug.\n";
+		std::abort();
+	}
+	for(studentsListCls::value_type& val : studentSubmissions) {
+		val.second.setStudentName(val.first);
+		val.second.removeQuestions(questionsFiles);
+	}
+	{
+		etaCls eta;
+		eta.start(studentSubmissions.size() * (studentSubmissions.size() - 1) / 2);
+		studentsListCls::const_iterator beginIt(studentSubmissions.begin());
+		studentsListCls::const_iterator lhsIt(beginIt);
+		studentsListCls::const_iterator endIt(studentSubmissions.end());
+		for(++lhsIt; lhsIt != endIt; ++lhsIt) {
+			for(studentsListCls::const_iterator rhsIt{beginIt}; rhsIt != lhsIt; ++rhsIt) {
 				eta.step();
 				if(!(eta.scenario() % 10))
 					eta.info();
-				subIt->searchPlagiarism(*comparedIt);
+				lhsIt->second.searchPlagiarism(rhsIt->second);
 			}
 		}
+		std::cerr << "              \r                                                                             \r";
+		eta.printDescription();
 	}
-	std::cerr << "              \r                                                                             \r";
-	eta.printDescription();
-
 	///3. Print plagiarism report.
 	for(const phraseCls& phrase : plagiarizedPhrases)
 		phrase.print();
