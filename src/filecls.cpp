@@ -94,7 +94,7 @@ namespace fpdt {
 	}
 
 	bool studentSubmissionsCls::nextComparisonInviable() const {
-		if(mComparisonStart + 1 + minPhraseLength < mContents.length()) {
+		if(mComparisonStart + 1 + minPhraseLength < mContentsCopy.length()) {
 			mPosition = ++mComparisonStart;
 			return false;
 		}
@@ -103,8 +103,8 @@ namespace fpdt {
 
 	char studentSubmissionsCls::nextChar() const {
 		// mContents.length() is optimized;
-		if(mPosition < mContents.length())
-			return mContents[mPosition++];
+		if(mPosition < mContentsCopy.length())
+			return mContentsCopy[mPosition++];
 		else
 			return 0;
 	}
@@ -115,13 +115,15 @@ namespace fpdt {
 			std::abort();
 		}
 #endif // DEBUG
-		mContents.erase(mComparisonStart, mPosition - 1 - mComparisonStart);
+		mContentsCopy.erase(mComparisonStart, mPosition - 1 - mComparisonStart);
 		restartComparison();
 	}
 
 	void studentSubmissionsCls::removeQuestions(const studentSubmissionsCls& questionsDocument) {
 		reset();
 		questionsDocument.reset();
+		copyContents();
+		questionsDocument.copyContents();
 		std::string candidatePhrase;
 		while(true) {
 			const char c1{nextChar()};
@@ -132,14 +134,18 @@ namespace fpdt {
 			}
 			if(candidatePhrase.length() > minPhraseLength) {
 				removeQuestion();
-				if(mComparisonStart + minPhraseLength >= mContents.length())
+				if(mComparisonStart + minPhraseLength >= mContentsCopy.length()) {
+					mContents = mContentsCopy;
 					return;
+				}
 				questionsDocument.reset(); // Required because there is an all new text in *this
 			} else {
 				restartComparison();
 				if(questionsDocument.nextComparisonInviable()) {
-					if(nextComparisonInviable())
+					if(nextComparisonInviable()) {
+						mContents = mContentsCopy;
 						return;
+					}
 					questionsDocument.reset();
 				}
 			}
@@ -150,6 +156,8 @@ namespace fpdt {
 	void studentSubmissionsCls::searchPlagiarism(const studentSubmissionsCls& otherAssignment) const {
 		reset();
 		otherAssignment.reset();
+		copyContents();
+		otherAssignment.copyContents();
 		std::string candidatePhrase, phraseCompilation;
 		while(true) {
 			const char c1{nextChar()};
@@ -161,7 +169,7 @@ namespace fpdt {
 			if(candidatePhrase.length() > minPhraseLength) {
 				phraseCompilation += candidatePhrase + "\n\n";
 				mComparisonStart = mPosition;
-				if(mComparisonStart + minPhraseLength >= mContents.length())
+				if(mComparisonStart + minPhraseLength >= mContentsCopy.length())
 					return;
 				otherAssignment.reset(); // Required because there is an all new text in *this
 			} else {

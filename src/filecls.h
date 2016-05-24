@@ -46,12 +46,16 @@ class studentSubmissionsCls {
 		std::string mStudentName;
 		/// Contains the full text that was extracted from the file.
 		std::string mContents;
+		/// Contains a copy of mContents, which will be changing.
+		mutable std::string mContentsCopy;
 		/// Contains the position of the start of a string comparison.
 		mutable std::string::size_type mComparisonStart{0};
 		/// Position within mContents
 		mutable std::string::size_type mPosition{0};
 		/// Resets the file position pointers
 		void reset() const { mComparisonStart = 0; mPosition = 0; }
+		/// Copies the contents to the buffer
+		void copyContents() const { mContentsCopy = mContents; }
 		/// Moves the pointers in order to start the next comparison.
 		bool nextComparisonInviable() const _wur_;
 		/// Restarts the current comparison.
