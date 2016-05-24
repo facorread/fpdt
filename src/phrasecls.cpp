@@ -23,7 +23,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <iostream>
 #include "phrasecls.h"
 
-namespace fpdt {	
+namespace fpdt {
 	std::ofstream outFile("fpdt.txt");
 
 	void fpdt::phraseCls::print() const {
