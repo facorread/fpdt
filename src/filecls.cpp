@@ -102,6 +102,15 @@ namespace fpdt {
 		return true;
 	}
 
+	bool studentSubmissionsCls::nextPhraseComparisonInviable() const {
+		if(mComparisonStart + 60 + minPhraseLength < mContentsCopy.length()) {
+			mComparisonStart += 60;
+			mPosition = mComparisonStart;
+			return false;
+		}
+		return true;
+	}
+
 	char studentSubmissionsCls::nextChar() const {
 		// mContents.length() is optimized;
 		if(mPosition < mContentsCopy.length())
@@ -177,7 +186,7 @@ namespace fpdt {
 			} else {
 				restartComparison();
 				if(otherAssignment.nextComparisonInviable()) {
-					if(nextComparisonInviable()) {
+					if(nextPhraseComparisonInviable()) {
 						reportPlagiarism(phraseCls{phraseCompilation, *this, otherAssignment});
 						return;
 					}

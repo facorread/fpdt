@@ -58,6 +58,8 @@ class studentSubmissionsCls {
 		void copyContents() const { mContentsCopy = mContents; }
 		/// Moves the pointers in order to start the next comparison.
 		bool nextComparisonInviable() const _wur_;
+		/// Moves the pointers a long step in order to start the next comparison.
+		bool nextPhraseComparisonInviable() const _wur_;
 		/// Restarts the current comparison.
 		void restartComparison() const { mPosition = mComparisonStart; }
 		/// Returns the char at the current position, then advances mPosition. Returns 0 if it at the end of the document.
