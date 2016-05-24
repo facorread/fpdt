@@ -19,11 +19,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <fstream>
-#include "filecls.h"
+#include "studentcls.h"
 #include <iostream>
 #include "listoffiles.h"
 #include "main.h"
 #include "phrasecls.h"
+#include <set>
 
 namespace fpdt {
 	void cleanExtractedFiles() {
@@ -48,32 +49,26 @@ namespace fpdt {
 		return std::isalnum(inputChar, loc) || std::ispunct(inputChar, loc);
 	}
 
-	void studentSubmissionsCls::add(const std::string& filename) {
-		const listOfFilesCls listOfExtractedFilenames(extractXML(filename));
+	void studentCls::add(const std::string& submissionFileName) {
+		const listOfFilesCls listOfExtractedFilenames(extractXML(submissionFileName));
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
 			std::ifstream file(extractedFilename);
 			if(!file) {
 				errorMsg << "Error opening file " << extractedFilename.c_str() << ". Please debug.\n";
 				std::abort();
 			}
-			mContents.reserve(mContents.size() + 10000);
+			std::string phrase;
+			bool startingSentence{true};
 			// Used to transform all nonPrinting characters into only one whitespace
 			bool skippingWhitespace{false};
 			// Skipping an XML tag
 			bool skippingTag{false};
-			while(true) {
-				char inputChar;
-				file.get(inputChar);
-				if(!file.good())
-					break;
+			char inputChar;
+			bool previousInputCharIsDigit{false};
+			while(file.get(inputChar)) {
 				if(skippingTag) {
-					if(inputChar == '>') {
+					if(inputChar == '>')
 						skippingTag = false;
-						if(!skippingWhitespace) {
-							mContents += ' ';
-							skippingWhitespace = true;
-						}
-					}
 					continue;
 				}
 				if(inputChar == '<') {
@@ -83,118 +78,89 @@ namespace fpdt {
 				if(isContent(inputChar)) {
 					if(skippingWhitespace)
 						skippingWhitespace = false; // continue below;
-					mContents += inputChar;
-				} else if(!skippingWhitespace) {
-					mContents += ' ';
+					phrase += inputChar;
+					if((((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':')) && (phrase.length() > 20)) {
+						mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
+						phrase.clear();
+						startingSentence = true;
+					} else if(startingSentence)
+						startingSentence = false;
+					previousInputCharIsDigit = std::isdigit(inputChar, std::locale{});
+			} else {
+				if(!skippingWhitespace) {
+					if(!startingSentence)
+						phrase += ' ';
 					skippingWhitespace = true;
 				}
 			}
+			}
 		}
 		cleanExtractedFiles();
-		mContents += "\n\n";
 	}
 
-	bool studentSubmissionsCls::nextComparisonInviable() const {
-		if(mComparisonStart + 1 + minPhraseLength < mContentsCopy.length()) {
-			mPosition = ++mComparisonStart;
-			return false;
-		}
-		return true;
+void studentCls::organize() {
+	std::set<phraseHashCls> uniqueSortedHashes;
+	uniqueSortedHashes.insert(std::make_move_iterator(mUnorderedHashes.begin()), std::make_move_iterator(mUnorderedHashes.end()));
+	if(uniqueSortedHashes.empty()) {
+		errorMsg << "Submissions for student " << studentName().c_str() << " have no data. Please debug.\n";
+		std::abort();
 	}
+	mUnorderedHashes.clear();
+	mHashes.assign(std::make_move_iterator(uniqueSortedHashes.begin()), std::make_move_iterator(uniqueSortedHashes.end()));
+}
 
-	bool studentSubmissionsCls::nextPhraseComparisonInviable() const {
-		if(mComparisonStart + 60 + minPhraseLength < mContentsCopy.length()) {
-			mComparisonStart += 60;
-			mPosition = mComparisonStart;
-			return false;
-		}
-		return true;
+void studentCls::removeQuestionsAndOrganize(const studentCls& questionsDocument) {
+	mUnorderedHashes.sort();
+	mUnorderedHashes.unique();
+	if(mUnorderedHashes.empty()) {
+		errorMsg << "Submissions for student " << studentName().c_str() << " have no data. Please debug.\n";
+		std::abort();
 	}
+	orderedHashesCls::const_iterator questionIt(questionsDocument.mHashes.cbegin());
+	const orderedHashesCls::const_iterator questionEnd(questionsDocument.mHashes.cend());
+	unorderedHashesCls::iterator hashIt(mUnorderedHashes.begin());
+	const unorderedHashesCls::const_iterator hashEnd(mUnorderedHashes.cend());
+	while(true) {
+		if(*hashIt < *questionIt) {
+			if(++hashIt == hashEnd)
+				break;
+			continue;
+		}
+		if(*questionIt < *hashIt) {
+			if(++questionIt == questionEnd)
+				break;
+			continue;
+		}
+		hashIt = mUnorderedHashes.erase(hashIt);
+		if(hashIt == hashEnd)
+			break;
+	}
+	mHashes.assign(std::make_move_iterator(mUnorderedHashes.begin()), std::make_move_iterator(mUnorderedHashes.end()));
+	mUnorderedHashes.clear();
+}
 
-	char studentSubmissionsCls::nextChar() const {
-		// mContents.length() is optimized;
-		if(mPosition < mContentsCopy.length())
-			return mContentsCopy[mPosition++];
-		else
-			return 0;
-	}
-	void studentSubmissionsCls::removeMatchedPortion() const {
-#ifdef DEBUG
-		if((mPosition < mComparisonStart + minPhraseLength) || (mPosition >= mContents.length())) {
-			errorMsg << "Attempt to erase an invalid portion of a string with length " << mContents.length() << ", at positions [" << mComparisonStart << ", " << mPosition - 1 << "). Please debug.\n";
-			std::abort();
+void studentCls::searchPlagiarism(const studentCls& otherStudent) const {
+	matchedHashesCls matchedHashes;
+	orderedHashesCls::const_iterator it(mHashes.cbegin());
+	const orderedHashesCls::const_iterator itEnd(mHashes.cend());
+	orderedHashesCls::const_iterator otherIt(otherStudent.mHashes.cbegin());
+	const orderedHashesCls::const_iterator otherEnd(otherStudent.mHashes.cend());
+	while(true) {
+		if(*it < *otherIt) {
+			if(++it == itEnd)
+				break;
+			continue;
 		}
-#endif // DEBUG
-		mContentsCopy.erase(mComparisonStart, mPosition - 1 - mComparisonStart);
-		restartComparison();
-	}
-
-	void studentSubmissionsCls::removeQuestions(const studentSubmissionsCls& questionsDocument) {
-		reset();
-		questionsDocument.reset();
-		copyContents();
-		questionsDocument.copyContents();
-		std::string candidatePhrase;
-		while(true) {
-			const char c1{nextChar()};
-			const char c2{questionsDocument.nextChar()};
-			if(c1 && c2 && (c1 == c2)) {
-				candidatePhrase.push_back(c1);
-				continue;
-			}
-			if(candidatePhrase.length() > minPhraseLength) {
-				removeMatchedPortion();
-				if(mComparisonStart + minPhraseLength >= mContentsCopy.length()) {
-					mContents = mContentsCopy;
-					return;
-				}
-				questionsDocument.reset(); // Required because there is an all new text in *this
-			} else {
-				restartComparison();
-				if(questionsDocument.nextComparisonInviable()) {
-					if(nextComparisonInviable()) {
-						mContents = mContentsCopy;
-						return;
-					}
-					questionsDocument.reset();
-				}
-			}
-			candidatePhrase.clear();
+		if(*otherIt < *it) {
+			if(++otherIt == otherEnd)
+				break;
+			continue;
 		}
+		matchedHashes.emplace_back(*it);
+		if(++it == itEnd)
+			break;
 	}
-
-	void studentSubmissionsCls::searchPlagiarism(const studentSubmissionsCls& otherAssignment) const {
-		reset();
-		otherAssignment.reset();
-		copyContents();
-		otherAssignment.copyContents();
-		std::string candidatePhrase, phraseCompilation;
-		while(true) {
-			const char c1{nextChar()};
-			const char c2{otherAssignment.nextChar()};
-			if(c1 && c2 && (c1 == c2)) {
-				candidatePhrase.push_back(c1);
-				continue;
-			}
-			if(candidatePhrase.length() > minPhraseLength) {
-				phraseCompilation += candidatePhrase + "\n\n";
-				removeMatchedPortion();
-				if(mComparisonStart + minPhraseLength >= mContentsCopy.length())
-					return;
-				otherAssignment.removeMatchedPortion();
-				otherAssignment.reset(); // Required because there is an all new text in *this
-			} else {
-				restartComparison();
-				if(otherAssignment.nextComparisonInviable()) {
-					if(nextPhraseComparisonInviable()) {
-						reportPlagiarism(phraseCls{phraseCompilation, *this, otherAssignment});
-						return;
-					}
-					otherAssignment.reset();
-				}
-			}
-			candidatePhrase.clear();
-		}
-	}
+	reportPlagiarism(phraseCls{std::move(matchedHashes), *this, otherStudent});
+}
 
 }

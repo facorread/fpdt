@@ -22,11 +22,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define MAIN_H
 
 #include "diagnostics.h"
+#include <string>
 
 namespace fpdt {
 	class phraseCls;
-	constexpr size_t minPhraseLength{60};
-
 	void reportPlagiarism(phraseCls&& phrase);
 	size_t nPlagiarismReports() _wur_;
 }

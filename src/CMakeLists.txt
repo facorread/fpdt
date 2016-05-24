@@ -22,6 +22,7 @@ chrono.cpp
 diagnostics.cpp
 eta.cpp
 studentcls.cpp
+hash.cpp
 listoffiles.cpp
 main.cpp
 phrasecls.cpp

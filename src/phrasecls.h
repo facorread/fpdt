@@ -22,23 +22,29 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define PHRASECLS_H
 
 #include "diagnostics.h"
+#include "hash.h"
+#include <list>
 #include <string>
+#include "studentcls.h"
+#include <vector>
 
 namespace fpdt {
 	// Forward declaration.
-	class studentSubmissionsCls;
+	class studentCls;
+	/// Typedef for a list of hashes
+	typedef std::list<stringHashCls::result_type> matchedHashesCls;
 	/// Represents a phrase that is being compared between two documents.
 	class phraseCls {
 		public:
 			/// Constructor.
-			phraseCls(const std::string& phrase, const studentSubmissionsCls& file1, const studentSubmissionsCls& file2) : mPhrase{phrase}, mStudent1{file1.studentName()}, mStudent2{file2.studentName()} {}
+			phraseCls(matchedHashesCls&& matchedHashes, const studentCls& file1, const studentCls& file2) : mMatchedHashes{std::move(matchedHashes)}, mStudent1{file1.studentName()}, mStudent2{file2.studentName()} {}
 			/// Comparison operator
-			bool operator>(const phraseCls& rhs) const _wur_ { return mPhrase.length() > rhs.mPhrase.length(); }
+			bool operator>(const phraseCls& rhs) const _wur_ { return mMatchedHashes.size() > rhs.mMatchedHashes.size(); }
 			/// Prints the plagiarized phrase.
 			void print() const;
 		private:
-			/// Phrase.
-			std::string mPhrase;
+			/// Number of phrases matched between the students.
+			matchedHashesCls mMatchedHashes;
 			/// Student that wrote the phrase.
 			std::string mStudent1;
 			/// Student that wrote the phrase.

@@ -18,56 +18,47 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#ifndef FILECLS_H
-#define FILECLS_H
+#ifndef STUDENTCLS_H
+#define STUDENTCLS_H
 
 #include "diagnostics.h"
+#include "hash.h"
+#include <list>
 #include <string>
+#include <vector>
 
 namespace fpdt {
 
-/// Abstraction of a student's submissions
-class studentSubmissionsCls {
+/// Abstraction of a student and his submissions
+class studentCls {
 	public:
 		/// Sets the student name.
 		void setStudentName(const std::string& studentname) { mStudentName = studentname; }
 		/// Opens the file and extracts the text into memory.
-		void add(const std::string& filename);
+		void add(const std::string& submissionFileName);
 		/// Returns the name of the file.
 		const std::string& studentName() const _wur_ { return mStudentName; }
-		/// Returns the full text that was extracted from the file.
-		const std::string& contents() const _wur_ { return mContents; }
+		/// Organizes the hashes for fast comparisons.
+		void organize();
 		/// Removes text from questions and guides.
-		void removeQuestions(const studentSubmissionsCls& questionsDocument);
+		void removeQuestionsAndOrganize(const studentCls& questionsDocument);
 		/// Searches for plagiarized phrases.
-		void searchPlagiarism(const studentSubmissionsCls& otherAssignment) const;
+		void searchPlagiarism(const studentCls& otherStudent) const;
 	private:
-		/// Contains the name of the file.
+		/// Typedef for the hashes
+		typedef stringHashCls::result_type phraseHashCls;
+		/// Typedef for the unordered hashes of each and every sentence in the student's submissions.
+		typedef std::list<phraseHashCls> unorderedHashesCls;
+		/// Typedef for the ordered, unique hashes of each and every sentence in the student's submissions.
+		typedef std::vector<phraseHashCls> orderedHashesCls;
+		/// Contains the name of the student.
 		std::string mStudentName;
-		/// Contains the full text that was extracted from the file.
-		std::string mContents;
-		/// Contains a copy of mContents, which will be changing.
-		mutable std::string mContentsCopy;
-		/// Contains the position of the start of a string comparison.
-		mutable std::string::size_type mComparisonStart{0};
-		/// Position within mContents
-		mutable std::string::size_type mPosition{0};
-		/// Resets the file position pointers
-		void reset() const { mComparisonStart = 0; mPosition = 0; }
-		/// Copies the contents to the buffer
-		void copyContents() const { mContentsCopy = mContents; }
-		/// Moves the pointers in order to start the next comparison.
-		bool nextComparisonInviable() const _wur_;
-		/// Moves the pointers a long step in order to start the next comparison.
-		bool nextPhraseComparisonInviable() const _wur_;
-		/// Restarts the current comparison.
-		void restartComparison() const { mPosition = mComparisonStart; }
-		/// Returns the char at the current position, then advances mPosition. Returns 0 if it at the end of the document.
-		char nextChar() const _wur_;
-		/// Removes the portion of text in [mComparisonStart, mContents - 1). Used te remove the text of a question.
-		void removeMatchedPortion() const;
+		/// Unordered hashes of each and every sentence in the student's submissions.
+		unorderedHashesCls mUnorderedHashes;
+		/// Ordered, unique hashes of each and every sentence in the student's submissions.
+		orderedHashesCls mHashes;
 };
 
 }
 
-#endif // FILECLS_H
+#endif // STUDENTCLS_H

@@ -18,29 +18,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <fstream>
 #include "hash.h"
-#include <iostream>
-#include "phrasecls.h"
-#include "studentcls.h"
+#include <map>
 
 namespace fpdt {
-	std::ofstream outFile("fpdt.txt");
+	typedef std::map<stringHashCls::result_type, std::string> phraseHashTableCls;
+	phraseHashTableCls phraseHashTable;
 
-	class longerStringCls {
-		public:
-			bool operator()(const std::string* a, const std::string* b) { return a->length() > b->length(); }
-	};
+	stringHashCls::result_type calculateHashAndStorePhrase(std::string&& phrase) {
+		const stringHashCls::result_type hash(stringHashCls{}(phrase));
+		phraseHashTable.emplace(std::make_pair(hash, std::move(phrase)));
+		return hash;
+	}
 
-	void fpdt::phraseCls::print() const {
-		outFile << "Plagiarism detected: " << mStudent1 << '\t' << mStudent2 << '\n';
-		std::list<const std::string*> phrases;
-		for(const matchedHashesCls::value_type& hash : mMatchedHashes)
-			phrases.emplace_back(&(phraseFromHash(hash)));
-		phrases.sort(longerStringCls{});
-		for(const std::string* s : phrases)
-			outFile << *s << '\n';
-		outFile << "\n\n";
+	const std::string& phraseFromHash(stringHashCls::result_type hash) {
+		return phraseHashTable.at(hash);
 	}
 
 }

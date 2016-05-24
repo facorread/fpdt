@@ -18,29 +18,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <fstream>
-#include "hash.h"
-#include <iostream>
-#include "phrasecls.h"
-#include "studentcls.h"
+#ifndef HASH_H
+#define HASH_H
+
+#include <string>
 
 namespace fpdt {
-	std::ofstream outFile("fpdt.txt");
-
-	class longerStringCls {
-		public:
-			bool operator()(const std::string* a, const std::string* b) { return a->length() > b->length(); }
-	};
-
-	void fpdt::phraseCls::print() const {
-		outFile << "Plagiarism detected: " << mStudent1 << '\t' << mStudent2 << '\n';
-		std::list<const std::string*> phrases;
-		for(const matchedHashesCls::value_type& hash : mMatchedHashes)
-			phrases.emplace_back(&(phraseFromHash(hash)));
-		phrases.sort(longerStringCls{});
-		for(const std::string* s : phrases)
-			outFile << *s << '\n';
-		outFile << "\n\n";
-	}
-
+	typedef std::hash<std::string> stringHashCls;
+	stringHashCls::result_type calculateHashAndStorePhrase(std::string&& phrase);
+	const std::string& phraseFromHash(stringHashCls::result_type hash);
 }
+
+#endif // HASH_H

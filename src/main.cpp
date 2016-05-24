@@ -19,9 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "eta.h"
-#include "filecls.h"
+#include "studentcls.h"
 #include "listoffiles.h"
 #include <iostream>
+#include "main.h"
 #include <map>
 #include "phrasecls.h"
 #include <set>
@@ -53,12 +54,15 @@ namespace fpdt {
 		}
 		return result;
 	}
+
+
 }
 
 int main() {
 	using namespace fpdt;
 	///1. Questions files are opened.
-	studentSubmissionsCls questionsFiles;
+	studentCls questionsFiles;
+	questionsFiles.setStudentName("Questions");
 	const listOfFilesCls questionsFileNames{listOfFiles("*.docx *.xlsx")};
 	if(questionsFileNames.empty()) {
 		std::cerr << "Assignment question files are required to prevent false positives.\n";
@@ -67,10 +71,11 @@ int main() {
 	for(const std::string& questionsFileName : questionsFileNames) {
 		questionsFiles.add(questionsFileName);
 	}
+	questionsFiles.organize();
 
 	///2. Assignment submissions are opened.
 	// Map of student names to student submissions.
-	typedef std::map<std::string, studentSubmissionsCls> studentsListCls;
+	typedef std::map<std::string, studentCls> studentsListCls;
 	studentsListCls studentSubmissions;
 	if(std::system(std::string("unzip -qqn submissions.zip '*.docx' '*.xlsx' -d fpdtSubmissions >& fpdtUnzipOutput.txt").c_str())) {
 		std::cerr << "Error opening the submissions zipfile. Please review.\n";
@@ -90,8 +95,10 @@ int main() {
 		std::abort();
 	}
 	for(studentsListCls::value_type& val : studentSubmissions) {
-		val.second.setStudentName(val.first);
-		val.second.removeQuestions(questionsFiles);
+		studentCls& student{val.second};
+		student.setStudentName(val.first);
+		student.removeQuestionsAndOrganize(questionsFiles);
+		// student.organize(); // Never use this here.
 	}
 	{
 		etaCls eta;
@@ -113,4 +120,7 @@ int main() {
 	///3. Print plagiarism report.
 	for(const phraseCls& phrase : plagiarizedPhrases)
 		phrase.print();
+
+	std::cout << "less -S fpdt.txt\n";
+	std::system("less -S fpdt.txt\n");
 }
