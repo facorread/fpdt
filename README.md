@@ -23,7 +23,7 @@ This is a small `C++` program designed to detect intra-corpal plagiarism; this i
 
 This program is not designed for general use. You are welcome to use it to develop your own derivative program for your own purposes. In my case, this program is designed to work with student assignment submissions downloaded from the University of Maryland's ELMS learning management system.
 
-In my class webpage the students download the assignment questions in the form of a `docx` and `xlsx` documents; they answer the questions directly there, and submit the completed documents via ELMS.
+In my class webpage the students download the assignment questions in the form of `docx` and `xlsx` documents; they answer the questions directly there, and submit the completed documents via ELMS.
 
 This program takes as input the file `submissions.zip` downloaded from the ELMS assignment page. It will use the unzip program to extract the submissions into a `fpdt` folder, then it will extract the text from all submissions into memory.
 
@@ -35,7 +35,7 @@ Please read carefully and understand all instructions in this section, as they w
 
 The workflow of plagiarism detection starts with a text terminal located at the folder to which web downloads are saved (usually `~/Desktop` or `~/Downloads`).
 
-`rm -rv submissions*.zip *.docx *.xlsx fpdt fpdt.txt`
+`rm -rv submissions*.zip *.docx *.xlsx fpdtSubmissions fpdt.txt`
 
 The ELMS assignment webpage is opened, the questions are downloaded, and then the `Download Submissions` link is clicked. Once the files are downloaded, the program is invoked at the terminal without changing the working directory. Every `docx` and `xlsx` file currently at the download directory (not subdirectories or zipfiles) is taken as questions input.
 
