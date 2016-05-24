@@ -38,13 +38,14 @@ namespace fpdt {
 	}
 
 	std::string extractStudentName(const std::string& fileName) {
-		for(std::string::const_iterator it(fileName.begin()); it != fileName.end(); ++it) {
+		std::string::const_iterator it(fileName.begin());
+		for(; it != fileName.end(); ++it) {
 			const char c(*it);
 			if(c == '/')
 				break;
 		}
 		std::string result;
-		for(std::string::const_iterator it(fileName.begin()); it != fileName.end(); ++it) {
+		for(++it; it != fileName.end(); ++it) {
 			const char c(*it);
 			if(c == '_')
 				break;

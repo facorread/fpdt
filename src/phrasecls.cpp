@@ -27,7 +27,7 @@ namespace fpdt {
 	std::ofstream outFile("fpdt.txt");
 
 	void fpdt::phraseCls::print() const {
-		outFile << mStudent1 << '\t' << mStudent2 << '\n';
+		outFile << "Student submissions: " << mStudent1 << '\t' << mStudent2 << '\n';
 		outFile << mPhrase << "\n\n";
 	}
 
