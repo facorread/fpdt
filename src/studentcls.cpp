@@ -34,7 +34,7 @@ namespace fpdt {
 	/// Extracts the list of Word documents or Excel worksheets XML contained in a docx/xlsx file.
 	const listOfFilesCls extractXML(const std::string& filename) {
 		cleanExtractedFiles();
-		std::system(std::string("unzip '" + filename + "' word/document.xml 'word/media/*' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' > unzipOut.log 2> unzipError.log").c_str());
+		std::system(std::string("unzip '" + filename + "' word/document.xml 'word/media/*.emf' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' > unzipOut.log 2> unzipError.log").c_str());
 		return listOfFiles("word/document.xml xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 	}
 
