@@ -39,7 +39,7 @@ namespace fpdt {
 			return listOfFilesCls{{"word/document.xml"}};
 		if(!std::system(std::string("unzip -qq '" + filename + "' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' 2> /dev/null").c_str()))
 			return listOfFiles("xl/sharedStrings.xml xl/worksheets/sheet*.xml");
-		errorMsg << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
+		fpdtAbort << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
 		std::abort();
 	}
 
@@ -53,10 +53,7 @@ namespace fpdt {
 		const listOfFilesCls listOfExtractedFilenames(extractXML(submissionFileName));
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
 			std::ifstream file(extractedFilename);
-			if(!file) {
-				errorMsg << "Error opening file " << extractedFilename.c_str() << ". Please debug.\n";
-				std::abort();
-			}
+			assertFalse(!file) << "Error opening file " << extractedFilename.c_str() << ". Please debug.\n";
 			std::string phrase;
 			bool startingPhrase{true};
 			// Used to transform all nonPrinting characters into only one whitespace
@@ -121,7 +118,7 @@ void studentCls::removeQuestionsAndOrganize(const studentCls& questionsDocument)
 	mUnorderedHashes.sort();
 	mUnorderedHashes.unique();
 	if(mUnorderedHashes.empty()) {
-		errorMsg << "Submissions for student " << studentName().c_str() << " have no data.\n";
+		std::cerr << "Submissions for student " << studentName().c_str() << " have no data.\n";
 		return;
 	}
 	orderedHashesCls::const_iterator questionIt(questionsDocument.mHashes.cbegin());

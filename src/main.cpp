@@ -90,10 +90,7 @@ int main() {
 		const std::string& studentName{extractStudentName(submissionFileName)};
 		studentSubmissions[studentName].add(submissionFileName);
 	}
-	if(studentSubmissions.empty()) {
-		errorMsg << "No student submissions. Please debug.\n";
-		std::abort();
-	}
+	assertFalse(studentSubmissions.empty()) << "No student submissions. Please debug.\n";
 	for(studentsListCls::value_type& val : studentSubmissions) {
 		studentCls& student{val.second};
 		student.setStudentName(val.first);
