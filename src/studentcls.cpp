@@ -86,7 +86,7 @@ namespace fpdt {
 						skippingWhitespace = false; // continue below;
 					phrase += inputChar;
 					if(((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) {
-						std::cerr << '<' << phrase << ">\n";
+						//std::cerr << '<' << phrase << ">\n";
 						if(phrase.size() > 10)
 							mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
 						phrase.clear();
