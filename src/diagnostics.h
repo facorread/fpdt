@@ -24,26 +24,95 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 /** \file
 	* Contains algorithms to diagnose problems with the program. */
 
+#include <iostream>
 #include <cstddef>
 
-/// Wrapper for std::cerr. Saves compile time by removing <iostream> from diagnostics.h.
-class errorMsgWrapperCls {
+namespace fpdt {
+/// Strongly-typed version of the DEBUG instruction
+#ifdef DEBUG
+constexpr bool debugProgram{true};
+#else
+constexpr bool debugProgram{false};
+#endif // DEBUG
+
+/// Handling assertions and debugging code with pretty function printing and std::abort.
+/** This enhances the funcionality of C/C++ `assert`. */
+class assertCls {
 	public:
-		/// Outputs an error message to std::cerr. Returns a reference to \c this. \param [in] var Error message or value.
-		template<typename varT> errorMsgWrapperCls& operator<<(const varT var);
+		/// Destructor aborts.
+		~assertCls() { std::abort(); }
+		/// Outputs an error message to std::cerr. Returns a reference to `this`. @param [in] var Error message or value.
+		template<typename varT> assertCls const& operator<<(const varT& var) const {
+			std::cerr << var;
+			return *this;
+		}
 };
 
-// Explicit template instantiations to save on compilation time.
-extern template errorMsgWrapperCls& errorMsgWrapperCls::operator<<(const int var);
-extern template errorMsgWrapperCls& errorMsgWrapperCls::operator<<(const unsigned int var);
-extern template errorMsgWrapperCls& errorMsgWrapperCls::operator<<(const bool var);
-extern template errorMsgWrapperCls& errorMsgWrapperCls::operator<<(const double var);
-extern template errorMsgWrapperCls& errorMsgWrapperCls::operator<<(const size_t var);
-extern template errorMsgWrapperCls& errorMsgWrapperCls::operator<<(const char* var);
-/// Wrapper for std::cerr. Saves compile time by removing <iostream> from diagnostics.h.
-extern errorMsgWrapperCls errorMsgWrapper;
+/// Handling multiple related assertions before aborting a program.
+/** This enhances the funcionality of C/C++ `assert`. */
+class multiAssertCls {
+	public:
+		/// Aborts depending on the assertions.
+		void evaluate() const {
+			if(!mSuccess)
+				std::abort();
+		}
+		/// Destructor aborts depending on the assertions.
+		~multiAssertCls() {
+			evaluate();
+		}
+		/// Outputs an error message to std::cerr. Returns a reference to `this`. @param [in] var Error message or value.
+		template<typename varT> multiAssertCls& operator<<(const varT& var) {
+			if(mPrint)
+				std::cerr << var;
+			return *this;
+		}
+		/// Makes a new assertion.
+		multiAssertCls& operator()(const bool assertion) {
+			mPrint = !assertion;
+			if(mSuccess && mPrint)
+				mSuccess = false;
+			return *this;
+		}
+	private:
+		/// Whether to print error messages
+		bool mPrint{false};
+		/// Whether any of the assertions has failed
+		bool mSuccess{true};
+};
 
-#define errorMsg errorMsgWrapper << __FILE__ << " " << __LINE__ << " " << __PRETTY_FUNCTION__ << "() "
+/// Handling assertions and debugging code with pretty function printing and std::abort.
+#define fpdtAssert(expr) if(!(expr)) assertCls() << __FILE__ << " " << __LINE__ << " " << __PRETTY_FUNCTION__ << " "
+
+#define fpdtAbort fpdtAssert(false)
+
+#define assertZero(expr) fpdtAssert(!(expr)) << "assertZero(" << #expr << ") : " << expr << ". "
+
+#define assertNonZero(expr) fpdtAssert((expr)) << "assertNonZero(" << #expr << ") : " << expr << ". "
+
+#define assertNull(expr) fpdtAssert(!(expr)) << "assertNull(" << #expr << ") : " << expr << ". "
+
+#define assertNonNull(expr) fpdtAssert((expr)) << "assertNonNull(" << #expr << ") : " << expr << ". "
+
+#define assertFalse(expr) fpdtAssert(!(expr)) << "assertFalse(" << #expr << ") : " << expr << ". "
+
+#define assertTrue(expr) fpdtAssert((expr)) << "assertTrue(" << #expr << ") : " << expr << ". "
+
+#define assertEqual(expr, expected) fpdtAssert((expr) == (expected)) << "assert(" << #expr << " == " << #expected << ") : " << expr << " == " << expected << ". "
+
+#define assertDifferent(expr, expected) fpdtAssert((expr) != (expected)) << "assert(" << #expr << " != " << #expected << ") : " << expr << " != " << expected << ". "
+
+#define assertGreaterEqual(expr, expected) fpdtAssert((expr) >= (expected)) << "assert(" << #expr << " >= " << #expected << ") : " << expr << " >= " << expected << ". "
+
+#define assertGreater(expr, expected) fpdtAssert((expr) > (expected)) << "assert(" << #expr << " > " << #expected << ") : " << expr << " > " << expected << ". "
+
+#define assertLessEqual(expr, expected) fpdtAssert((expr) <= (expected)) << "assert(" << #expr << " <= " << #expected << ") : " << expr << " <= " << expected << ". "
+
+#define assertLess(expr, expected) fpdtAssert((expr) < (expected)) << "assert(" << #expr << " < " << #expected << ") : " << expr << " < " << expected << ". "
+
+#define simDiag std::cerr << __FILE__ << " " << __LINE__ << " " << __PRETTY_FUNCTION__ << " "
+
+#define assertfstream(ifile) fpdtAssert(ifile.is_open() && ifile.good()) << #ifile << ": is_open " << ifile.is_open() << ", bad " << ifile.bad() << ", eof " << ifile.eof() << ", fail " << ifile.fail() << ". "
 
 /// \def _wur_
 /// \brief Warns about unused values that are returned by functions.
@@ -55,6 +124,6 @@ extern errorMsgWrapperCls errorMsgWrapper;
 #endif
 
 /// Checks that a pointer has a valid memory address.
-void checkPointer(void * const p);
-
+void checkPointer(const void * const p);
+} // namespace std
 #endif
