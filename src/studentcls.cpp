@@ -121,8 +121,8 @@ void studentCls::removeQuestionsAndOrganize(const studentCls& questionsDocument)
 	mUnorderedHashes.sort();
 	mUnorderedHashes.unique();
 	if(mUnorderedHashes.empty()) {
-		errorMsg << "Submissions for student " << studentName().c_str() << " have no data. Please debug.\n";
-		std::abort();
+		errorMsg << "Submissions for student " << studentName().c_str() << " have no data.\n";
+		return;
 	}
 	orderedHashesCls::const_iterator questionIt(questionsDocument.mHashes.cbegin());
 	const orderedHashesCls::const_iterator questionEnd(questionsDocument.mHashes.cend());

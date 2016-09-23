@@ -100,6 +100,10 @@ int main() {
 		student.removeQuestionsAndOrganize(questionsFiles);
 		// student.organize(); // Never use this here.
 	}
+	for(studentsListCls::iterator sIt{studentSubmissions.begin()}; sIt != studentSubmissions.end(); ++sIt) {
+		if(sIt->second.noTextFound())
+			studentSubmissions.erase(sIt--);
+	}
 	{
 		etaCls eta;
 		eta.start(studentSubmissions.size() * (studentSubmissions.size() - 1) / 2);

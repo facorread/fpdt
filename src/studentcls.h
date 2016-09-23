@@ -42,6 +42,8 @@ class studentCls {
 		void organize();
 		/// Removes text from questions and guides.
 		void removeQuestionsAndOrganize(const studentCls& questionsDocument);
+		/// Returns whether no text was found in `this` student's submissions.
+		bool noTextFound() const _wur_ { return mHashes.empty(); }
 		/// Searches for plagiarized phrases.
 		void searchPlagiarism(const studentCls& otherStudent) const;
 	private:
