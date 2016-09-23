@@ -28,19 +28,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace fpdt {
 	void cleanExtractedFiles() {
-		std::system("rm -f word/document.xml xl/sharedStrings.xml xl/worksheets/sheet*.xml");
+		std::system("rm -f word/document.xml word/media/* xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 	}
 
 	/// Extracts the list of Word documents or Excel worksheets XML contained in a docx/xlsx file.
 	const listOfFilesCls extractXML(const std::string& filename) {
 		cleanExtractedFiles();
-		// unzip returns 0 on successful extraction
-		if(!std::system(std::string("unzip -qq '" + filename + "' word/document.xml 2> /dev/null").c_str()))
-			return listOfFilesCls{{"word/document.xml"}};
-		if(!std::system(std::string("unzip -qq '" + filename + "' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' 2> /dev/null").c_str()))
-			return listOfFiles("xl/sharedStrings.xml xl/worksheets/sheet*.xml");
-		errorMsg << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
-		std::abort();
+		std::system(std::string("unzip '" + filename + "' word/document.xml 'word/media/*' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' > unzipOut.log 2> unzipError.log").c_str());
+		return listOfFiles("word/document.xml xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 	}
 
 	/// Returns whether a character should be considered as valid content
