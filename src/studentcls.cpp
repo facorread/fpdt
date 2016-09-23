@@ -110,7 +110,7 @@ void studentCls::organize() {
 	std::set<phraseHashCls> uniqueSortedHashes;
 	uniqueSortedHashes.insert(std::make_move_iterator(mUnorderedHashes.begin()), std::make_move_iterator(mUnorderedHashes.end()));
 	if(uniqueSortedHashes.empty()) {
-		errorMsg << "Submissions for student " << studentName().c_str() << " have no data. Please debug.\n";
+		std::cerr << "Submissions for student " << studentName().c_str() << " have no data. Please debug.\n";
 		std::abort();
 	}
 	mUnorderedHashes.clear();
