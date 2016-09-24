@@ -42,10 +42,15 @@ namespace fpdt {
 		return listOfFiles("word/document.xml word/media/*.txt xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 	}
 
+	/// Returns whether a character should be considered as punctuation.
+	bool isPunctuation(const char inputChar) {
+		return (inputChar == '.') || (inputChar == '?') || (inputChar == ':') || (inputChar == ')');
+	}
+
 	/// Returns whether a character should be considered as valid content
 	bool isContent(const char inputChar) {
 		static const std::locale loc;
-		return std::isalpha(inputChar, loc) || std::ispunct(inputChar, loc);
+		return std::isalpha(inputChar, loc) || isPunctuation(inputChar);
 	}
 
 	void studentCls::add(const std::string& submissionFileName) {
@@ -84,7 +89,7 @@ namespace fpdt {
 					if(skippingWhitespace)
 						skippingWhitespace = false; // continue below;
 					phrase += inputChar;
-					if((inputChar == '.') || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) {
+					if(isPunctuation(inputChar)) {
 						//std::cerr << '<' << phrase << ">\n";
 						if(phrase.size() > 10)
 							mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
