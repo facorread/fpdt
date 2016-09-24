@@ -45,7 +45,7 @@ namespace fpdt {
 	/// Returns whether a character should be considered as valid content
 	bool isContent(const char inputChar) {
 		static const std::locale loc;
-		return std::isalnum(inputChar, loc) || std::ispunct(inputChar, loc);
+		return std::isalpha(inputChar, loc) || std::ispunct(inputChar, loc);
 	}
 
 	void studentCls::add(const std::string& submissionFileName) {
@@ -64,7 +64,6 @@ namespace fpdt {
 			// Skipping an XML tag
 			bool skippingTag{false};
 			char inputChar;
-			bool previousInputCharIsDigit{false};
 			while(file.get(inputChar)) {
 				if(skippingTag) {
 					if(inputChar == '>') {
@@ -85,7 +84,7 @@ namespace fpdt {
 					if(skippingWhitespace)
 						skippingWhitespace = false; // continue below;
 					phrase += inputChar;
-					if(((inputChar == '.') && !previousInputCharIsDigit) || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) {
+					if((inputChar == '.') || (inputChar == '?') || (inputChar == ':') || (inputChar == ')')) {
 						//std::cerr << '<' << phrase << ">\n";
 						if(phrase.size() > 10)
 							mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
@@ -93,7 +92,6 @@ namespace fpdt {
 						startingPhrase = true;
 					} else if(startingPhrase)
 						startingPhrase = false;
-					previousInputCharIsDigit = std::isdigit(inputChar, std::locale{});
 			} else {
 				if(!skippingWhitespace) {
 					if(!startingPhrase)
