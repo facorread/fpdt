@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "main.h"
 #include "phrasecls.h"
 #include <set>
+#include <sstream>
 
 namespace fpdt {
 	void cleanExtractedFiles() {
@@ -34,9 +35,11 @@ namespace fpdt {
 	/// Extracts the list of Word documents or Excel worksheets XML contained in a docx/xlsx file.
 	const listOfFilesCls extractXML(const std::string& filename) {
 		cleanExtractedFiles();
-		std::system(std::string("unzip '" + filename + "' word/document.xml 'word/media/*.emf' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml' > unzipOut.log 2> unzipError.log").c_str());
-		return listOfFiles("word/document.xml xl/sharedStrings.xml xl/worksheets/sheet*.xml");
-		fpdtAbort << "Error extracting information from " << filename.c_str() << ": not a word/excel file.\n";
+		std::system(std::string(
+									"{ set -o xtrace; unzip '" + filename + "' word/document.xml 'word/media/*.emf' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml'"
+												"; [ \"$(echo word/media/*.emf)\" != \"word/media/*.emf\" ] && { libreoffice --headless --convert-to pdf --outdir word/media word/media/*.emf; for file in word/media/*.pdf; do pdftotext \"${file}\"; done; } } >& fpdt.log"
+												).c_str());
+		return listOfFiles("word/document.xml word/media/*.txt xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 	}
 
 	/// Returns whether a character should be considered as valid content
