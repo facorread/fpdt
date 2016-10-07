@@ -43,4 +43,8 @@ namespace fpdt {
 		outFile << "\n\n";
 	}
 
-}
+	void phraseClsTidyUp() {
+		outFile.close();
+	}
+
+} // namespace fpdt

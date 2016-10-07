@@ -51,6 +51,9 @@ namespace fpdt {
 			std::string mStudent2;
 	};
 
-}
+	// Closes the output file.
+	void phraseClsTidyUp();
+
+} // namespace fpdt
 
 #endif // PHRASECLS_H

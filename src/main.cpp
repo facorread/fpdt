@@ -127,6 +127,7 @@ int main() {
 	for(const phraseCls& phrase : plagiarizedPhrases)
 		phrase.print();
 
+	fpdt::phraseClsTidyUp();
 	std::cout << "less -S fpdt.txt\n";
 	std::system("less -S fpdt.txt\n");
 }
