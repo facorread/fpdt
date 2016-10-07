@@ -77,8 +77,13 @@ int main() {
 	// Map of student names to student submissions.
 	typedef std::map<std::string, studentCls> studentsListCls;
 	studentsListCls studentSubmissions;
-	if(std::system(std::string("unzip -qqn submissions.zip '*.docx' '*.xlsx' -d fpdtSubmissions >& fpdtUnzipOutput.txt").c_str())) {
-		std::cerr << "Error opening the submissions zipfile. Please review.\n";
+	bool unzipError{true};
+	if(!std::system(std::string("unzip -qqn submissions.zip '*.docx' -d fpdtSubmissions >& fpdtUnzipOutput.txt").c_str()))
+		unzipError = false;
+	if(!std::system(std::string("unzip -qqn submissions.zip '*.xlsx' -d fpdtSubmissions 2>&1 >> fpdtUnzipOutput.txt").c_str()))
+		unzipError = false;
+	if(unzipError) {
+		std::cerr << "Error opening the submissions zipfile. Please review fpdtUnzipOutput.txt .\n";
 		std::exit(1);
 	}
 	const listOfFilesCls submissionsFileNames{listOfFiles("fpdtSubmissions/*.{docx,xlsx}")};
