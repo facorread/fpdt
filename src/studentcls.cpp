@@ -56,8 +56,7 @@ namespace fpdt {
 	void studentCls::add(const std::string& submissionFileName) {
 		const listOfFilesCls listOfExtractedFilenames(extractXML(submissionFileName));
 		if(listOfExtractedFilenames.empty()) {
-			std::cerr << "File " << submissionFileName << " contains no data. Please review it.";
-			std::exit(1);
+			std::cerr << "File " << submissionFileName << " contains no data. Please review it.\n";
 		}
 		for(const std::string& extractedFilename : listOfExtractedFilenames) {
 			std::ifstream file(extractedFilename);
