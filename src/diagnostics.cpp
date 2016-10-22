@@ -66,8 +66,8 @@ class diagnosticsTestCls {
 			assertLessEqual(varLessEqual, 1) << "Error message." << '\n';
 			constexpr int varLess{0};
 			assertLess(varLess, 1) << "Error message." << '\n';
-			std::ifstream varifstream("CMakeCache.txt");
-			assertfstream(varifstream);
+			//std::ifstream varifstream("CMakeCache.txt");
+			//assertfstream(varifstream);
 		}
 		void assertCls2Test() { simDiag << "Diagnostics message.\n"; }
 		void multiAssertClsTest() {
