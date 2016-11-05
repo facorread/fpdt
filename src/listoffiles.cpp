@@ -33,7 +33,7 @@ std::string getLine(std::ifstream& file) {
 }
 
 fpdt::listOfFilesCls fpdt::listOfFiles(const std::string filePattern) {
-	std::system(("ls -1 " + filePattern + " > fpdtListOfFiles.txt 2>/dev/null").c_str()); // Ignore the exit code.
+	std::system(("ls -1 " + filePattern + " > fpdtListOfFiles.txt 2>fpdtListOfFiles.log").c_str()); // Ignore the exit code.
 	listOfFilesCls result;
 	std::ifstream lsResult("fpdtListOfFiles.txt");
 	while(true) {

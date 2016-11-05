@@ -35,10 +35,7 @@ namespace fpdt {
 	/// Extracts the list of Word documents or Excel worksheets XML contained in a docx/xlsx file.
 	const listOfFilesCls extractXML(const std::string& filename) {
 		cleanExtractedFiles();
-		std::system(std::string(
-		"{ set -o xtrace; unzip '" + filename + "' word/document.xml 'word/media/*.emf' xl/sharedStrings.xml 'xl/worksheets/sheet*.xml'"
-		"; [ \"$(echo word/media/*.emf)\" != \"word/media/*.emf\" ] && { libreoffice --headless --convert-to pdf --outdir word/media word/media/*.emf; for file in word/media/*.pdf; do pdftotext \"${file}\"; done; } } >& fpdt.log"
-		).c_str());
+		std::system(std::string("~/doc/src/plagiarism/src/extractxml.sh '" + filename + "'").c_str());
 		return listOfFiles("word/document.xml word/media/*.txt xl/sharedStrings.xml xl/worksheets/sheet*.xml");
 	}
 
@@ -85,17 +82,22 @@ namespace fpdt {
 					continue;
 				}
 				if(isContent(inputChar)) {
-					if(skippingWhitespace)
-						skippingWhitespace = false; // continue below;
-					phrase += inputChar;
 					if(isPunctuation(inputChar)) {
 						//std::cerr << '<' << phrase << ">\n";
-						if(phrase.size() > 10)
+						if(phrase.size() > 10) {
+							if(skippingWhitespace && (phrase.back() == ' '))
+								phrase.pop_back();
 							mUnorderedHashes.emplace_back(calculateHashAndStorePhrase(std::move(phrase)));
+						}
 						phrase.clear();
 						startingPhrase = true;
-					} else if(startingPhrase)
-						startingPhrase = false;
+					} else {
+						phrase += inputChar;
+						if(startingPhrase)
+							startingPhrase = false;
+					}
+					if(skippingWhitespace)
+						skippingWhitespace = false; // This cannot be moved above because there is another check for skippingWhitespace over there.
 			} else {
 				if(!skippingWhitespace) {
 					if(!startingPhrase)

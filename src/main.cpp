@@ -78,15 +78,15 @@ int main() {
 	typedef std::map<std::string, studentCls> studentsListCls;
 	studentsListCls studentSubmissions;
 	bool unzipError{true};
-	if(!std::system(std::string("unzip -qqn submissions.zip '*.docx' -d fpdtSubmissions >& fpdtUnzipOutput.txt").c_str()))
+	if(!std::system(std::string("~/doc/src/plagiarism/src/unzipDocument.sh '*.docx'").c_str()))
 		unzipError = false;
-	if(!std::system(std::string("unzip -qqn submissions.zip '*.xlsx' -d fpdtSubmissions 2>&1 >> fpdtUnzipOutput.txt").c_str()))
+	if(!std::system(std::string("~/doc/src/plagiarism/src/unzipDocument.sh '*.xlsx'").c_str()))
 		unzipError = false;
 	if(unzipError) {
 		std::cerr << "Error opening the submissions zipfile. Please review fpdtUnzipOutput.txt .\n";
 		std::exit(1);
 	}
-	const listOfFilesCls submissionsFileNames{listOfFiles("fpdtSubmissions/*.{docx,xlsx}")};
+	const listOfFilesCls submissionsFileNames{listOfFiles("fpdtSubmissions/*.docx fpdtSubmissions/*.xlsx")};
 	if(submissionsFileNames.empty()) {
 		std::cerr << "No assignments in accepted formats.\n";
 		std::exit(1);

@@ -33,7 +33,7 @@ namespace fpdt {
 	};
 
 	void fpdt::phraseCls::print() const {
-		outFile << "Plagiarism detected: " << mStudent1 << '\t' << mStudent2 << '\n';
+		outFile << "Matching texts detected: " << mStudent1 << '\t' << mStudent2 << '\n';
 		std::list<const std::string*> phrases;
 		for(const matchedHashesCls::value_type& hash : mMatchedHashes)
 			phrases.emplace_back(&(phraseFromHash(hash)));
