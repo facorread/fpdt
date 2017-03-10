@@ -78,9 +78,11 @@ int main() {
 	typedef std::map<std::string, studentCls> studentsListCls;
 	studentsListCls studentSubmissions;
 	bool unzipError{true};
-	if(!std::system(std::string("~/doc/src/plagiarism/src/unzipDocument.sh '*.docx'").c_str()))
+	if(!std::system("~/doc/src/plagiarism/src/unzipDocument.sh '*.docx'"))
 		unzipError = false;
-	if(!std::system(std::string("~/doc/src/plagiarism/src/unzipDocument.sh '*.xlsx'").c_str()))
+	if(!std::system("~/doc/src/plagiarism/src/unzipDocument.sh '*.xlsx'"))
+		unzipError = false;
+	if(!std::system("~/doc/src/plagiarism/src/unzipOldDocuments.sh"))
 		unzipError = false;
 	if(unzipError) {
 		std::cerr << "Error opening the submissions zipfile. Please review fpdtUnzipOutput.txt .\n";
@@ -129,5 +131,5 @@ int main() {
 
 	fpdt::phraseClsTidyUp();
 	std::cout << "less -S fpdt.txt\n";
-	std::system("less -S fpdt.txt\n");
+	return std::system("less -S fpdt.txt\n");
 }

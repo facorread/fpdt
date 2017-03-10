@@ -1,3 +1,3 @@
 #!/bin/bash
 
-unzip -n submissions.zip "$@" -d fpdtSubmissions >& fpdtUnzipOutput.txt
+unzip -n submissions.zip "$@" -d fpdtSubmissions 2>&1 >> fpdtUnzipOutput.txt
